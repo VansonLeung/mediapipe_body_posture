@@ -44,6 +44,7 @@ import {
   Target,
   TrendingUp,
   Upload,
+  Monitor,
 } from 'lucide-react';
 import { exercises, getExercise } from './lib/exercises';
 import type { ExerciseId } from './lib/exercises';
@@ -81,7 +82,7 @@ function readHistory(): SessionRecord[] {
     return [];
   }
 }
-export default function App() {
+export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
   const [page, setPage] = useState<Page>('studio');
   const [mode, setMode] = useState<'guided' | 'free'>('guided');
   const [selected, setSelected] = useState<ExerciseId>('warrior');
@@ -254,6 +255,18 @@ export default function App() {
         </a>
         <div className="nav-label">YOUR SPACE</div>
         <nav aria-label="Main navigation">
+          <button
+            className="nav-item"
+            aria-label="Posture Monitor"
+            onClick={() => {
+              if (active) session.finish();
+              tracker.stop();
+              onOpenPosture();
+            }}
+          >
+            <Monitor size={19} />
+            <span>Posture Monitor</span>
+          </button>
           <button
             aria-label="Movement studio"
             className={page === 'studio' ? 'nav-item selected' : 'nav-item'}

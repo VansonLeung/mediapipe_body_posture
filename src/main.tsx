@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ConfigProvider } from 'antd';
-import App from './App';
+import Workspaces from './Workspaces';
 import './styles.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         },
       }}
     >
-      <App />
+      <Workspaces />
     </ConfigProvider>
   </React.StrictMode>,
 );

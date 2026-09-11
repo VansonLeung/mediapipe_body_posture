@@ -1,6 +1,6 @@
-# Forma — movement studio
+# Forma — movement studio & posture monitor
 
-A private, browser-based yoga and warm-up coach built with Vite, React, TypeScript, Ant Design, and MediaPipe Pose Landmarker.
+A private, browser-based movement studio and seated posture monitor built with Vite, React, TypeScript, Ant Design, and MediaPipe Pose Landmarker.
 
 ## Run
 
@@ -30,6 +30,30 @@ Browser tests use installed Google Chrome. To use Playwright Chromium instead, r
 - **Video review:** user-controlled playback, scrubbing, a feedback timeline, and clickable moments to revisit. Only played portions during an active session are analyzed into the timeline. Replaying previously credited time does not inflate hold totals.
 - **Progress:** up to 100 session summaries in local storage, aggregate metrics, and JSON downloads. No account or backend.
 - Responsive exercise library, illustrated pose instructions, camera setup tips, and accessible controls.
+
+## Seated Posture Monitor
+
+Open **http://127.0.0.1:5175/#posture**, or choose **Posture Monitor** in the studio navigation. Use **Movement Studio** in the monitor header to return. The monitor has its own dark navy interface and English/Traditional Chinese language switch. The language preference persists locally; camera references are intentionally captured anew for each setup.
+
+1. Choose **Front**, **Side**, or **Diagonal** camera placement. For side and diagonal views, select whether the webcam is on **your left** or **your right**. Keep the camera upright; diagonal means a front-left or front-right view approximately 30–45° off center while you continue facing the screen.
+2. Select your webcam, enable it, and check the upper-body framing. Front view needs the nose, both ears, and both shoulders. Side/diagonal views need the nose and the nearer ear and shoulder. Hips are optional and enable torso checks; wrists, legs, and feet are not required.
+3. Choose **Calibrate & start** and hold a comfortable reference position steady for three seconds. Significant movement or tracking loss restarts calibration. Monitoring starts automatically after capture.
+4. Use pause/resume, five-minute reminder snooze, and settings for reminder types, sensitivity, cooldown, voice, mirror, and optional skeleton tweening (off by default).
+5. Finish to save a summary with monitored time, time near the reference, tracking gaps, and reminder events. History is separate from exercise sessions, and summaries can be downloaded as JSON.
+
+The camera/landmark/tweening implementation is shared through `usePoseTracker`. `src/lib/posture.ts` provides separate reference calibration, view-dependent measurements, and sustained reminder logic. `src/hooks/usePostureMonitor.ts` manages the monitoring clock, camera lifecycle, alerts, and local history. No exercise-specific full-body gate or rep counter is used in this workspace.
+
+| Profile  | Measurements                                                                                                                 | Default sustained-change delay |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Front    | Lateral head tilt, shoulder alignment, optional shoulder-to-hip lean, relative apparent head size                            | 5 seconds                      |
+| Side     | Near-side ear-to-shoulder line, optional shoulder-to-hip lean, relative apparent head size when perspective can be checked   | 5 seconds                      |
+| Diagonal | Changes from the captured projected head/torso geometry, conservative relative proximity checks; no shoulder-asymmetry score | At least 8 seconds             |
+
+Reminders have a default 30-second cooldown. The apparent-size proximity check is suspended when its perspective cross-check is missing or changes too much. It does not measure centimeters or actual distance to the screen. Missing measurements are shown as unavailable, and time without all calibrated measurements is counted as a tracking gap rather than near-reference time. Calibrated channels that are unavailable never trigger an alert.
+
+Keep the monitor page visible, for example beside your work or on a second screen. Monitoring automatically pauses when the page becomes hidden, and requires manual resume when you return. This is not an operating-system background monitor. Camera changes and profile changes end the current session and clear its reference. A change in video aspect ratio also invalidates the reference; camera movement that preserves the image geometry cannot reliably be distinguished from user movement, so recalibrate whenever the webcam is repositioned.
+
+The measurements are heuristic changes relative to a user-selected reference, not anatomical angles, validated medical targets, or a diagnosis. Chair support, foot contact, weight distribution, and spinal curvature remain manual setup checks. Diagonal thresholds are conservative starting points and have not been clinically validated. Automated tests cover synthetic upper-body geometry, all three profile rules, calibration stability, tracking gaps, cooldown/snooze, and real MediaPipe inference on the reference photo; they do not replace testing with people in varied seated setups.
 
 ## How tracking works
 

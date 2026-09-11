@@ -91,49 +91,54 @@ export function usePoseTracker({
     setDuration(0);
     setError('');
   }, [releaseMedia]);
-  const startCamera = useCallback(async () => {
-    const id = ++requestId.current;
-    setCameraStarting(true);
-    setStatus('idle');
-    setError('');
-    try {
-      if (!navigator.mediaDevices?.getUserMedia)
-        throw new Error(
-          'Camera access needs localhost or an HTTPS connection.',
+  const startCamera = useCallback(
+    async (deviceId?: string) => {
+      const id = ++requestId.current;
+      setCameraStarting(true);
+      setStatus('idle');
+      setError('');
+      try {
+        if (!navigator.mediaDevices?.getUserMedia)
+          throw new Error(
+            'Camera access needs localhost or an HTTPS connection.',
+          );
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            ...(deviceId
+              ? { deviceId: { exact: deviceId } }
+              : { facingMode: 'user' }),
+            width: { ideal: 960 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+        if (id !== requestId.current) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        releaseMedia();
+        const next: Media = { kind: 'camera', stream };
+        mediaRef.current = next;
+        setMedia(next);
+      } catch (e) {
+        if (id !== requestId.current) return;
+        const name = e instanceof Error ? e.name : '';
+        setError(
+          name === 'NotAllowedError'
+            ? 'Camera access was denied. Allow camera access in your browser and try again, or upload a video.'
+            : name === 'NotFoundError'
+              ? 'No camera was found. Connect a camera or upload a video to get started.'
+              : e instanceof Error
+                ? e.message
+                : 'Could not open the camera. Please try again.',
         );
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 960 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      });
-      if (id !== requestId.current) {
-        stream.getTracks().forEach((t) => t.stop());
-        return;
+        setStatus('error');
+      } finally {
+        if (id === requestId.current) setCameraStarting(false);
       }
-      releaseMedia();
-      const next: Media = { kind: 'camera', stream };
-      mediaRef.current = next;
-      setMedia(next);
-    } catch (e) {
-      if (id !== requestId.current) return;
-      const name = e instanceof Error ? e.name : '';
-      setError(
-        name === 'NotAllowedError'
-          ? 'Camera access was denied. Allow camera access in your browser and try again, or upload a video.'
-          : name === 'NotFoundError'
-            ? 'No camera was found. Connect a camera or upload a video to get started.'
-            : e instanceof Error
-              ? e.message
-              : 'Could not open the camera. Please try again.',
-      );
-      setStatus('error');
-    } finally {
-      if (id === requestId.current) setCameraStarting(false);
-    }
-  }, [releaseMedia]);
+    },
+    [releaseMedia],
+  );
   const upload = useCallback(
     (file: File) => {
       if (!file.type.startsWith('video/')) {
