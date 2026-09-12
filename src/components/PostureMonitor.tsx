@@ -19,7 +19,6 @@ import {
   Activity,
   Armchair,
   ArrowLeft,
-  ArrowRight,
   Bell,
   BellOff,
   Camera,
@@ -33,6 +32,7 @@ import {
   History,
   Languages,
   Maximize,
+  Minimize,
   Pause,
   Play,
   RotateCcw,
@@ -110,6 +110,16 @@ export default function PostureMonitor({
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]),
     [deviceId, setDeviceId] = useState('');
   const preview = useRef<HTMLDivElement>(null);
+  const appRoot = useRef<HTMLDivElement>(null);
+  const [appFullscreen, setAppFullscreen] = useState(false);
+  const popupContainer = () =>
+    (document.fullscreenElement as HTMLElement | null) ?? document.body;
+  useEffect(() => {
+    const update = () =>
+      setAppFullscreen(document.fullscreenElement === appRoot.current);
+    document.addEventListener('fullscreenchange', update);
+    return () => document.removeEventListener('fullscreenchange', update);
+  }, []);
   const options = useMemo(
     () => ({
       profile,
@@ -206,6 +216,7 @@ export default function PostureMonitor({
           : 'finding';
   return (
     <ConfigProvider
+      getPopupContainer={popupContainer}
       locale={language === 'zh' ? zhTW : enUS}
       theme={{
         algorithm: theme.darkAlgorithm,
@@ -223,18 +234,18 @@ export default function PostureMonitor({
         },
       }}
     >
-      <div className="pm-shell" lang={language === 'zh' ? 'zh-Hant' : 'en'}>
+      <div
+        ref={appRoot}
+        className="pm-shell"
+        lang={language === 'zh' ? 'zh-Hant' : 'en'}
+      >
         <header className="pm-header">
           <div className="pm-brand">
             <span className="pm-app-icon">
               <Armchair size={28} />
             </span>
             <div>
-              <strong>
-                {t('title')}
-                <span>by forma.</span>
-              </strong>
-              <p>{t('subtitle')}</p>
+              <strong>{t('title')}</strong>
             </div>
           </div>
           <div className="pm-header-actions">
@@ -261,6 +272,25 @@ export default function PostureMonitor({
               />
             </div>
             <Button
+              aria-label={t('history')}
+              title={t('history')}
+              icon={<History size={17} />}
+              onClick={() => setHistory(true)}
+            />
+            <Button
+              aria-label={t(appFullscreen ? 'exitFullscreen' : 'appFullscreen')}
+              title={t(appFullscreen ? 'exitFullscreen' : 'appFullscreen')}
+              icon={
+                appFullscreen ? <Minimize size={17} /> : <Maximize size={17} />
+              }
+              onClick={() => {
+                if (document.fullscreenElement)
+                  void document.exitFullscreen().catch(() => {});
+                else
+                  void appRoot.current?.requestFullscreen?.().catch(() => {});
+              }}
+            />
+            <Button
               aria-label={t('settings')}
               icon={<Settings2 size={18} />}
               onClick={() => setSettings(true)}
@@ -268,23 +298,9 @@ export default function PostureMonitor({
           </div>
         </header>
         <main className="pm-main">
-          <section className="pm-intro">
-            <div>
-              <span className="pm-eyebrow">
-                <i />
-                {t('eyebrow')}
-              </span>
-              <h1>{t('heading')}</h1>
-              <p>{t('intro')}</p>
-            </div>
-            <span className="pm-privacy">
-              <ShieldCheck size={16} />
-              {t('private')}
-            </span>
-          </section>
           <section className="pm-profiles">
             <div className="pm-profile-label">
-              <span className="pm-eyebrow">{t('chooseProfile')}</span>
+              <span>{t('cameraProfile')}</span>
               <button onClick={() => setGuide(true)}>
                 <CircleHelp size={14} />
                 {t('guide')}
@@ -298,7 +314,6 @@ export default function PostureMonitor({
                   aria-pressed={profile === p}
                   onClick={() => changeProfile(p)}
                 >
-                  <CameraPlacement profile={p} />
                   <div>
                     <strong>{t(p)}</strong>
                     <span>
@@ -334,7 +349,6 @@ export default function PostureMonitor({
               <div className="pm-section-title">
                 <ScanLine size={17} />
                 <h2>{t('calibration')}</h2>
-                <span className="pm-step-number">02</span>
               </div>
               <div
                 className={`pm-cal-orbit ${engine.reference ? 'complete' : ''}`}
@@ -348,19 +362,18 @@ export default function PostureMonitor({
                         ? 100
                         : 0
                   }
-                  size={116}
+                  size={42}
                   strokeWidth={3}
                   strokeColor={engine.reference ? '#3edba4' : '#43bdff'}
                   railColor="#16344c"
                   format={() =>
                     engine.reference ? (
-                      <Check size={38} />
+                      <Check size={18} />
                     ) : (
-                      <ScanLine size={36} />
+                      <ScanLine size={18} />
                     )
                   }
                 />
-                <span className="pm-orbit-dot" />
               </div>
               <h3>
                 {engine.phase === 'calibrating'
@@ -382,16 +395,6 @@ export default function PostureMonitor({
                     ? t('referenceHint')
                     : t('calibrationHint')}
               </p>
-              <ol>
-                {(['stepOne', 'stepTwo', 'stepThree'] as MonitorTextKey[]).map(
-                  (key, i) => (
-                    <li key={key}>
-                      <span>{i + 1}</span>
-                      {t(key)}
-                    </li>
-                  ),
-                )}
-              </ol>
               <Button
                 block
                 type="primary"
@@ -413,9 +416,9 @@ export default function PostureMonitor({
                   ? `${Math.round(engine.progress)}%`
                   : t(engine.reference ? 'recalibrate' : 'calibrate')}
               </Button>
-              <span className="pm-cal-note">
-                {!tracker.media ? t('needCamera') : t('recheck')}
-              </span>
+              {!tracker.media && (
+                <span className="pm-cal-note">{t('needCamera')}</span>
+              )}
             </aside>
             <section className="pm-camera pm-panel" ref={preview}>
               <div className="pm-camera-toolbar">
@@ -486,13 +489,7 @@ export default function PostureMonitor({
                 </div>
                 {!tracker.media && (
                   <div className="pm-camera-empty">
-                    <div className="pm-seat-frame">
-                      <SeatedReference />
-                      <i className="tl" />
-                      <i className="tr" />
-                      <i className="bl" />
-                      <i className="br" />
-                    </div>
+                    <Camera size={32} />
                     <h3>{t('noCamera')}</h3>
                     <p>{t('noCameraHint')}</p>
                     <Button
@@ -534,13 +531,6 @@ export default function PostureMonitor({
                     </Button>
                   </div>
                 )}
-                <div className="pm-video-footer">
-                  <span>
-                    <ScanLine size={14} />
-                    {t('seated')}
-                  </span>
-                  <span>forma.</span>
-                </div>
               </div>
               <div className="pm-preview-controls">
                 <label>
@@ -720,7 +710,6 @@ export default function PostureMonitor({
                 {t('duration')}
               </span>
               <strong>{formatTime(engine.stats.duration)}</strong>
-              <small>{t('session')}</small>
             </div>
             <div className="pm-stat green">
               <span>
@@ -728,7 +717,6 @@ export default function PostureMonitor({
                 {t('referenceTime')}
               </span>
               <strong>{formatTime(engine.stats.near)}</strong>
-              <small>{t('near')}</small>
             </div>
             <button className="pm-stat" onClick={() => setGuide(true)}>
               <span>
@@ -749,9 +737,6 @@ export default function PostureMonitor({
                 {t('reminderCount')}
               </span>
               <strong>{engine.stats.reminders}</strong>
-              <small>
-                {t('history')} <ArrowRight size={11} />
-              </small>
             </button>
             <div className="pm-snooze">
               <Button
@@ -773,16 +758,6 @@ export default function PostureMonitor({
               )}
             </div>
           </section>
-          <div className="pm-bottom-note">
-            <span>
-              <CircleHelp size={17} />
-              {t('guideBreak')}
-            </span>
-            <button onClick={() => setGuide(true)}>
-              {t('guide')}
-              <ArrowRight size={14} />
-            </button>
-          </div>
           {monitor.storageError && (
             <Alert
               title={t('storageError')}
@@ -790,21 +765,9 @@ export default function PostureMonitor({
               className="pm-alert"
             />
           )}
-          <footer className="pm-footer">
-            <span>
-              forma. <i /> {t('title')}
-            </span>
-            <span>
-              <ShieldCheck size={13} />
-              {t('privacyFooter')}
-            </span>
-            <button onClick={() => setHistory(true)}>
-              <History size={14} />
-              {t('history')}
-            </button>
-          </footer>
         </main>
         <Drawer
+          getContainer={popupContainer}
           rootClassName="pm-portal"
           title={t('settings')}
           open={settings}
@@ -898,6 +861,7 @@ export default function PostureMonitor({
           <p className="pm-setting-note">{t('finishFirst')}</p>
         </Drawer>
         <Modal
+          getContainer={popupContainer}
           rootClassName="pm-portal"
           title={detail ? t(detail) : ''}
           open={!!detail}
@@ -910,13 +874,6 @@ export default function PostureMonitor({
         >
           {detail && (
             <div className="pm-detail">
-              <p>
-                {t(
-                  detail === 'head' && profile === 'front'
-                    ? 'headFrontDetail'
-                    : descriptions[detail],
-                )}
-              </p>
               <div>
                 <span>{t('currentChange')}</span>
                 <strong>
@@ -934,11 +891,18 @@ export default function PostureMonitor({
                   {detail === 'proximity' ? '%' : '°'}
                 </strong>
               </div>
-              <p>{t('gapHint')}</p>
+              <p>
+                {t(
+                  detail === 'head' && profile === 'front'
+                    ? 'headFrontDetail'
+                    : descriptions[detail],
+                )}
+              </p>
             </div>
           )}
         </Modal>
         <Modal
+          getContainer={popupContainer}
           rootClassName="pm-portal"
           title={t('guideTitle')}
           open={guide}
@@ -951,6 +915,9 @@ export default function PostureMonitor({
         >
           <div className="pm-guide">
             <p>{t('guideIntro')}</p>
+            <div className="pm-guide-reference">
+              <SeatedReference />
+            </div>
             {(['front', 'side', 'diagonal'] as CameraProfile[]).map((p) => (
               <div key={p}>
                 <CameraPlacement profile={p} />
@@ -972,6 +939,7 @@ export default function PostureMonitor({
           </div>
         </Modal>
         <Drawer
+          getContainer={popupContainer}
           rootClassName="pm-portal"
           title={t('history')}
           open={history}
@@ -1018,6 +986,7 @@ export default function PostureMonitor({
           )}
         </Drawer>
         <Modal
+          getContainer={popupContainer}
           rootClassName="pm-portal"
           open={!!monitor.recap}
           onCancel={() => monitor.setRecap(null)}
@@ -1025,11 +994,7 @@ export default function PostureMonitor({
           width={550}
         >
           <div className="pm-recap">
-            <span className="pm-round-icon">
-              <Check size={30} />
-            </span>
             <h2>{t('summary')}</h2>
-            <p>{t('summaryHint')}</p>
             {monitor.recap && (
               <>
                 <div className="pm-recap-grid">

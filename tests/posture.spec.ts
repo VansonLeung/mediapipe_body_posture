@@ -21,11 +21,11 @@ test('workspaces coexist, profiles and bilingual settings work on desktop and mo
     .getByRole('button', { name: 'Diagonal view 30–45°', exact: true })
     .click();
   await page.getByText('Your right', { exact: true }).click();
+  await page.getByRole('button', { name: 'Setup guide', exact: true }).click();
   await expect(
-    page.getByText(
-      'Camera at your front-left or front-right, about 30–45° off center. Continue facing your monitor.',
-    ),
+    page.getByText(/Diagonal: place the camera at the front-left/),
   ).toBeVisible();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(page.locator('.pm-reading')).toHaveCount(3);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(
@@ -153,7 +153,7 @@ test('real tracking calibrates, monitors, pauses and persists a separate summary
     .getByRole('button', { name: 'Finish session', exact: true })
     .click();
   await expect(
-    page.getByRole('heading', { name: 'A moment of awareness, saved.' }),
+    page.getByRole('heading', { name: 'Session summary' }),
   ).toBeVisible();
   expect(
     await page.evaluate(
@@ -175,9 +175,101 @@ test('real tracking calibrates, monitors, pauses and persists a separate summary
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.reload();
   await page
-    .locator('.pm-footer')
+    .locator('.pm-header')
     .getByRole('button', { name: 'Session history' })
     .click();
   await expect(page.locator('.pm-history-item')).toHaveCount(1);
   expect(errors).toEqual([]);
+});
+
+test('utility view fits desktop and both fullscreen modes have no outer gutters', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto('/#posture');
+  await expect(
+    page.locator('.pm-intro, .pm-footer, .pm-bottom-note'),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText('Make space for better habits.', { exact: true }),
+  ).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollHeight <= innerHeight,
+    ),
+  ).toBe(true);
+  await page
+    .getByRole('button', { name: 'Fullscreen app', exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        document.fullscreenElement?.classList.contains('pm-shell'),
+      ),
+    )
+    .toBe(true);
+  const appBounds = await page.locator('.pm-main').evaluate((el) => {
+    const rect = el.getBoundingClientRect(),
+      style = getComputedStyle(el);
+    return {
+      x: rect.x,
+      width: rect.width,
+      viewport: innerWidth,
+      padding: style.padding,
+    };
+  });
+  expect(appBounds.x).toBe(0);
+  expect(appBounds.width).toBe(appBounds.viewport);
+  expect(appBounds.padding).toBe('0px');
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  expect(
+    await page
+      .getByRole('dialog')
+      .evaluate((el) => document.fullscreenElement?.contains(el)),
+  ).toBe(true);
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.locator('.pm-reading').first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  expect(
+    await page
+      .getByRole('dialog')
+      .evaluate((el) => document.fullscreenElement?.contains(el)),
+  ).toBe(true);
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Exit fullscreen', exact: true })
+    .click();
+  await expect
+    .poll(() => page.evaluate(() => document.fullscreenElement === null))
+    .toBe(true);
+  await page
+    .getByRole('button', { name: 'Expand camera preview', exact: true })
+    .click();
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        document.fullscreenElement?.classList.contains('pm-camera'),
+      ),
+    )
+    .toBe(true);
+  const cameraBounds = await page.locator('.pm-video').evaluate((el) => {
+    const rect = el.getBoundingClientRect(),
+      camera = el.closest('.pm-camera')!;
+    return {
+      x: rect.x,
+      width: rect.width,
+      viewport: innerWidth,
+      padding: getComputedStyle(camera).padding,
+    };
+  });
+  expect(cameraBounds.x).toBe(0);
+  expect(cameraBounds.width).toBe(cameraBounds.viewport);
+  expect(cameraBounds.padding).toBe('0px');
+  await page
+    .getByRole('button', { name: 'Expand camera preview', exact: true })
+    .click();
+  await expect
+    .poll(() => page.evaluate(() => document.fullscreenElement === null))
+    .toBe(true);
 });
