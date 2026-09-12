@@ -55,7 +55,7 @@ test('workspaces coexist, profiles and bilingual settings work on desktop and mo
   ).toBe(true);
   await page.getByRole('button', { name: '運動工作室', exact: true }).click();
   await expect(
-    page.getByRole('heading', { name: 'Your movement, more mindful.' }),
+    page.getByRole('heading', { name: 'Movement Studio' }),
   ).toBeVisible();
   await page
     .getByRole('button', { name: 'Posture Monitor', exact: true })
@@ -230,10 +230,12 @@ test('utility view fits desktop and both fullscreen modes have no outer gutters'
   ).toBe(true);
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.locator('.pm-reading').first().click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(
+    page.getByRole('dialog', { name: 'Head position', exact: true }),
+  ).toBeVisible();
   expect(
     await page
-      .getByRole('dialog')
+      .getByRole('dialog', { name: 'Head position', exact: true })
       .evaluate((el) => document.fullscreenElement?.contains(el)),
   ).toBe(true);
   await page.getByRole('button', { name: 'Done', exact: true }).click();

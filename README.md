@@ -1,6 +1,6 @@
 # Forma — movement studio & posture monitor
 
-A private, browser-based movement studio and seated posture monitor built with Vite, React, TypeScript, Ant Design, and MediaPipe Pose Landmarker.
+A local movement studio and seated posture monitor for browsers and Electron, built with Vite, React, TypeScript, Ant Design, and MediaPipe Pose Landmarker.
 
 ## Run
 
@@ -22,7 +22,30 @@ npm run test:e2e    # Chrome browser integration tests
 
 Browser tests use installed Google Chrome. To use Playwright Chromium instead, remove `channel: 'chrome'` from `playwright.config.ts` and run `npx playwright install chromium`.
 
+## Electron desktop app
+
+```sh
+npm run electron:dev    # Vite hot reload inside Electron; uses a separate local port
+npm run electron:start  # Build and run the production app, without a web server
+npm run electron:pack   # Build an unpacked desktop app in release/
+npm run electron:dist   # Build an installer for the current platform
+npm run test:electron   # Desktop integration test, including real MediaPipe video inference
+npm run test:desktop-security # Local resource and permission boundary tests
+```
+
+Both workspaces use the same React code and bundled model/WASM assets in the desktop app. Production assets are served from a local `forma://app` origin, with no server or network connection required. Electron storage is separate from browser storage; session summaries remain on that device.
+
+The fullscreen button expands the native desktop window. You can also use **View → Toggle Full Screen** (Control–Command–F on macOS, F11 on Windows/Linux). App fullscreen and camera-only fullscreen have no outer content padding. Settings and detail dialogs stay accessible in fullscreen.
+
+Camera access is requested when you enable it. On macOS, allow Forma in **System Settings → Privacy & Security → Camera** if access was previously denied. Microphone access is not requested. Development runs appear as Electron in operating-system permission prompts. The desktop renderer is sandboxed, with Node.js disabled and an isolated, fullscreen-only preload API; media permission is restricted to the local app.
+
+Packaging targets are macOS DMG, Windows NSIS, and Linux AppImage. Build on the target OS; Windows and Linux installers have not been verified on this macOS workspace. macOS builds use an ad-hoc signature for local use. Public distribution requires your own signing identity and Apple notarization configuration in `electron-builder.yml`. No publishing or auto-update service is configured.
+
+Electron implementation references: [local application protocols](https://www.electronjs.org/docs/latest/api/protocol), [permission handlers](https://www.electronjs.org/docs/latest/api/session), and [macOS packaging](https://www.electron.build/mac/).
+
 ## Features
+
+- **Compact workspaces:** toolbar navigation, concise labels, camera-first layouts, and no promotional headers or footers. Desktop practice fits the viewport; narrow screens use a stacked layout.
 
 - **Guided practice:** select Warrior II, Tree pose, arm raises, or standing side bends. A three-second full-body framing countdown leads into a 30-second aligned hold or eight controlled repetitions, followed by an eight-second rest and a recap.
 - **Open analysis:** practice without an automatic time or repetition limit. Both workflows support a live camera or an uploaded video.
@@ -67,7 +90,7 @@ The measurements are heuristic changes relative to a user-selected reference, no
 
 - Model: the official [MediaPipe Pose Landmarker Lite](https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task), bundled at `public/models/pose_landmarker_lite.task`.
 - WASM files are copied from the pinned npm package into `public/wasm` by the `postinstall` script. If lifecycle scripts are disabled, run `node scripts/copy-wasm.mjs` before starting or building.
-- No inference assets require a third-party request at runtime. Google Fonts is optional; system fonts are used if unavailable.
+- No inference assets or fonts require a third-party request at runtime. The interface uses system fonts.
 - Camera/video frames are processed in the browser and are not uploaded or recorded by the app. Uploaded files are referenced with local object URLs. Only session summaries are persisted.
 - Spoken cues use the browser's speech-synthesis service; voice availability depends on the browser/OS.
 - Illustrations and app icons are SVG. The photo in `tests/fixtures/pose.jpg` is the official [MediaPipe test image](https://storage.googleapis.com/mediapipe-assets/pose.jpg), used only for automated inference verification and not shipped in the app.

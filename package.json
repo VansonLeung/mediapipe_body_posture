@@ -9,7 +9,13 @@
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
     "postinstall": "node scripts/copy-wasm.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "electron:dev": "node scripts/electron-dev.mjs",
+    "electron:start": "npm run build && electron .",
+    "electron:pack": "npm run build && electron-builder --dir",
+    "electron:dist": "npm run build && electron-builder",
+    "test:electron": "npm run build && playwright test --config playwright.electron.config.ts",
+    "test:desktop-security": "node --test tests-desktop/security.test.cjs"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "0.10.32",
@@ -24,9 +30,13 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.0",
+    "electron": "44.3.0",
+    "electron-builder": "26.15.3",
     "prettier": "^3.9.6",
     "typescript": "~5.9.3",
     "vite": "^8.3.0",
     "vitest": "^4.0.18"
-  }
+  },
+  "description": "Local movement and seated posture analysis",
+  "main": "electron/main.cjs"
 }

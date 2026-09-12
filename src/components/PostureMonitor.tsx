@@ -55,6 +55,7 @@ import { monitorTranslations } from '../lib/postureLanguage';
 import type { MonitorLanguage, MonitorTextKey } from '../lib/postureLanguage';
 import { formatTime } from '../lib/analysis';
 import { usePostureMonitor } from '../hooks/usePostureMonitor';
+import { popupContainer, useAppFullscreen } from '../hooks/useAppFullscreen';
 import './posture.css';
 
 const metricIcons = {
@@ -111,15 +112,8 @@ export default function PostureMonitor({
     [deviceId, setDeviceId] = useState('');
   const preview = useRef<HTMLDivElement>(null);
   const appRoot = useRef<HTMLDivElement>(null);
-  const [appFullscreen, setAppFullscreen] = useState(false);
-  const popupContainer = () =>
-    (document.fullscreenElement as HTMLElement | null) ?? document.body;
-  useEffect(() => {
-    const update = () =>
-      setAppFullscreen(document.fullscreenElement === appRoot.current);
-    document.addEventListener('fullscreenchange', update);
-    return () => document.removeEventListener('fullscreenchange', update);
-  }, []);
+  const { fullscreen: appFullscreen, toggleFullscreen } =
+    useAppFullscreen(appRoot);
   const options = useMemo(
     () => ({
       profile,
@@ -283,12 +277,7 @@ export default function PostureMonitor({
               icon={
                 appFullscreen ? <Minimize size={17} /> : <Maximize size={17} />
               }
-              onClick={() => {
-                if (document.fullscreenElement)
-                  void document.exitFullscreen().catch(() => {});
-                else
-                  void appRoot.current?.requestFullscreen?.().catch(() => {});
-              }}
+              onClick={() => void toggleFullscreen().catch(() => {})}
             />
             <Button
               aria-label={t('settings')}

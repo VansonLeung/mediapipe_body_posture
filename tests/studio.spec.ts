@@ -1,4 +1,81 @@
 import { test, expect } from '@playwright/test';
+test('compact studio fills fullscreen and keeps controls accessible', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto('/');
+  await expect(page.locator('.sidebar, .page-heading, footer')).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollHeight <= innerHeight,
+    ),
+  ).toBe(true);
+  await page
+    .getByRole('button', { name: 'Fullscreen app', exact: true })
+    .click();
+  await expect
+    .poll(() => page.evaluate(() => document.fullscreenElement?.className))
+    .toBe('app-shell');
+  expect(
+    await page.locator('.main-content').evaluate((el) => ({
+      x: el.getBoundingClientRect().x,
+      width: el.getBoundingClientRect().width,
+      padding: getComputedStyle(el).padding,
+      viewport: innerWidth,
+    })),
+  ).toMatchObject({ x: 0, width: 1280, padding: '0px', viewport: 1280 });
+  await page.getByRole('button', { name: 'Preferences', exact: true }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  expect(
+    await page
+      .getByRole('dialog')
+      .evaluate((el) => document.fullscreenElement?.contains(el)),
+  ).toBe(true);
+  await page
+    .getByText('Gentle · 5° extra flexibility', { exact: true })
+    .click();
+  await expect(
+    page.getByText('Relaxed · 10° extra flexibility', { exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: 'Pose guide', exact: true }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  expect(
+    await page
+      .getByRole('dialog')
+      .evaluate((el) => document.fullscreenElement?.contains(el)),
+  ).toBe(true);
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await page
+    .getByRole('button', { name: 'Exit fullscreen', exact: true })
+    .click();
+  await page
+    .getByRole('button', { name: 'Expand preview', exact: true })
+    .click();
+  await expect
+    .poll(() => page.evaluate(() => document.fullscreenElement?.className))
+    .toBe('camera-panel');
+  expect(
+    await page
+      .locator('.camera-panel')
+      .evaluate((el) => getComputedStyle(el).padding),
+  ).toBe('0px');
+  expect(
+    await page
+      .locator('.video-stage')
+      .evaluate((el) => el.getBoundingClientRect().x),
+  ).toBe(0);
+  expect(
+    await page
+      .locator('.video-stage')
+      .evaluate((el) => el.getBoundingClientRect().width === innerWidth),
+  ).toBe(true);
+  await page
+    .getByRole('button', { name: 'Expand preview', exact: true })
+    .click();
+});
+
 test('studio, library, preferences, and responsive layout', async ({
   page,
 }) => {
@@ -6,7 +83,7 @@ test('studio, library, preferences, and responsive layout', async ({
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Your movement, more mindful.' }),
+    page.getByRole('heading', { name: 'Movement Studio' }),
   ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Start guided session' }),
@@ -27,7 +104,7 @@ test('studio, library, preferences, and responsive layout', async ({
     .getByRole('button', { name: 'Exercise library', exact: true })
     .click();
   await expect(
-    page.getByRole('heading', { name: 'A practice for your everyday.' }),
+    page.getByRole('heading', { name: 'Exercise library' }),
   ).toBeVisible();
   await page.getByText('Warm-up', { exact: true }).first().click();
   await expect(
@@ -51,9 +128,9 @@ test('studio, library, preferences, and responsive layout', async ({
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'My progress', exact: true }).click();
   await expect(
-    page.getByRole('heading', { name: 'Your story starts with one movement.' }),
+    page.getByRole('heading', { name: 'No sessions yet' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Find your flow' }).click();
+  await page.getByRole('button', { name: 'Start practice' }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
     path: 'test-results/studio-mobile.png',
@@ -89,7 +166,7 @@ test('handles denied camera permission with a recoverable message', async ({
     page.getByRole('button', { name: 'Start guided session' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: 'You showed up for yourself.' }),
+    page.getByRole('heading', { name: 'Session summary' }),
   ).toHaveCount(0);
 });
 test('loads the real MediaPipe model and analyzes an uploaded video locally', async ({
@@ -145,7 +222,7 @@ test('loads the real MediaPipe model and analyzes an uploaded video locally', as
   });
   await page.getByRole('button', { name: 'Finish session' }).click();
   await expect(
-    page.getByRole('heading', { name: 'You showed up for yourself.' }),
+    page.getByRole('heading', { name: 'Session summary' }),
   ).toBeVisible();
   await expect(
     page.getByText('No reliable pose was tracked.', { exact: false }),
@@ -227,7 +304,7 @@ test('guided camera practice detects a real pose, pauses holds, and releases the
     .click();
   await page.getByRole('button', { name: 'Finish session' }).click();
   await expect(
-    page.getByRole('heading', { name: 'You showed up for yourself.' }),
+    page.getByRole('heading', { name: 'Session summary' }),
   ).toBeVisible();
   expect(
     await page.evaluate(
