@@ -39,6 +39,9 @@ test('compact studio fills fullscreen and keeps controls accessible', async ({
   ).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await expect(
+    page.getByRole('dialog', { name: 'Preferences', exact: true }),
+  ).not.toBeVisible();
   await page.getByRole('button', { name: 'Pose guide', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   expect(
@@ -122,6 +125,8 @@ test('studio, library, preferences, and responsive layout', async ({
   const tweening = page.getByRole('switch', {
     name: 'Smooth skeleton movement',
   });
+  await expect(tweening).toBeChecked();
+  await tweening.uncheck();
   await expect(tweening).not.toBeChecked();
   await tweening.check();
   await expect(tweening).toBeChecked();

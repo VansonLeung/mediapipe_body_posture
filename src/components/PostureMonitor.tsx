@@ -98,7 +98,7 @@ export default function PostureMonitor({
   const [reminders, setReminders] = useState(true),
     [voice, setVoice] = useState(false);
   const [overlay, setOverlay] = useState(true),
-    [tweening, setTweening] = useState(false),
+    [tweening, setTweening] = useState(true),
     [mirror, setMirror] = useState(true);
   const [enabled, setEnabled] = useState({ ...defaultMonitorOptions.enabled });
   const [sustain, setSustain] = useState(5),

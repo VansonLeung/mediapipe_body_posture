@@ -129,7 +129,7 @@ const en = {
   overlay: 'Skeleton overlay',
   tweening: 'Smooth skeleton movement',
   tweenHint:
-    'Optional movement smoothing; disabled by default. Measurements use the original landmarks.',
+    'Movement smoothing is enabled by default. Measurements use the original landmarks.',
   mirror: 'Mirror preview',
   voice: 'Spoken reminders',
   voiceHint: 'Uses your browser’s available voices.',
@@ -288,7 +288,7 @@ const zh: Record<keyof typeof en, string> = {
   relaxed: '更寬鬆',
   overlay: '骨架疊圖',
   tweening: '平滑骨架動作',
-  tweenHint: '可選的動作平滑功能，預設關閉。測量仍使用原始關鍵點。',
+  tweenHint: '動作平滑功能預設開啟。測量仍使用原始關鍵點。',
   mirror: '鏡像預覽',
   voice: '語音提醒',
   voiceHint: '使用瀏覽器提供的語音。',

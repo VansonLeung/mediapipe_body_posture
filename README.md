@@ -29,6 +29,8 @@ npm run electron:dev    # Vite hot reload inside Electron; uses a separate local
 npm run electron:start  # Build and run the production app, without a web server
 npm run electron:pack   # Build an unpacked desktop app in release/
 npm run electron:dist   # Build an installer for the current platform
+npm run electron:dist:mac # Build the macOS DMG
+npm run electron:dist:win # Cross-build the Windows x64 NSIS installer on macOS
 npm run test:electron   # Desktop integration test, including real MediaPipe video inference
 npm run test:desktop-security # Local resource and permission boundary tests
 ```
@@ -39,7 +41,7 @@ The fullscreen button expands the native desktop window. You can also use **View
 
 Camera access is requested when you enable it. On macOS, allow Forma in **System Settings → Privacy & Security → Camera** if access was previously denied. Microphone access is not requested. Development runs appear as Electron in operating-system permission prompts. The desktop renderer is sandboxed, with Node.js disabled and an isolated, fullscreen-only preload API; media permission is restricted to the local app.
 
-Packaging targets are macOS DMG, Windows NSIS, and Linux AppImage. Build on the target OS; Windows and Linux installers have not been verified on this macOS workspace. macOS builds use an ad-hoc signature for local use. Public distribution requires your own signing identity and Apple notarization configuration in `electron-builder.yml`. No publishing or auto-update service is configured.
+Packaging targets are macOS DMG, Windows x64 NSIS, and Linux AppImage. Run `npm run electron:dist:win` (or `./scripts/build.sh`) on macOS to create the Windows installer in `release/`. macOS builds use an ad-hoc signature for local use. Public distribution requires the appropriate code-signing identities; Apple notarization can be configured in `electron-builder.yml`. No publishing or auto-update service is configured.
 
 Electron implementation references: [local application protocols](https://www.electronjs.org/docs/latest/api/protocol), [permission handlers](https://www.electronjs.org/docs/latest/api/session), and [macOS packaging](https://www.electron.build/mac/).
 
@@ -49,7 +51,7 @@ Electron implementation references: [local application protocols](https://www.el
 
 - **Guided practice:** select Warrior II, Tree pose, arm raises, or standing side bends. A three-second full-body framing countdown leads into a 30-second aligned hold or eight controlled repetitions, followed by an eight-second rest and a recap.
 - **Open analysis:** practice without an automatic time or repetition limit. Both workflows support a live camera or an uploaded video.
-- **Live coaching:** full-body skeleton with face anchors and a derived neck joint, optional keypoint tweening, joint angles, one alignment cue at a time, confidence gating, adjustable angle tolerances, optional spoken cues, and mirrored camera view. Tweening defaults to disabled and affects only the overlay; analysis continues to use raw landmarks.
+- **Live coaching:** full-body skeleton with face anchors and a derived neck joint, optional keypoint tweening, joint angles, one alignment cue at a time, confidence gating, adjustable angle tolerances, optional spoken cues, and mirrored camera view. Tweening defaults to enabled and affects only the overlay; analysis continues to use raw landmarks.
 - **Video review:** user-controlled playback, scrubbing, a feedback timeline, and clickable moments to revisit. Only played portions during an active session are analyzed into the timeline. Replaying previously credited time does not inflate hold totals.
 - **Progress:** up to 100 session summaries in local storage, aggregate metrics, and JSON downloads. No account or backend.
 - Responsive exercise library, illustrated pose instructions, camera setup tips, and accessible controls.
@@ -61,7 +63,7 @@ Open **http://127.0.0.1:5175/#posture**, or choose **Posture Monitor** in the st
 1. Choose **Front**, **Side**, or **Diagonal** camera placement. For side and diagonal views, select whether the webcam is on **your left** or **your right**. Keep the camera upright; diagonal means a front-left or front-right view approximately 30–45° off center while you continue facing the screen.
 2. Select your webcam, enable it, and check the upper-body framing. Front view needs the nose, both ears, and both shoulders. Side/diagonal views need the nose and the nearer ear and shoulder. Hips are optional and enable torso checks; wrists, legs, and feet are not required.
 3. Choose **Calibrate & start** and hold a comfortable reference position steady for three seconds. Significant movement or tracking loss restarts calibration. Monitoring starts automatically after capture.
-4. Use pause/resume, five-minute reminder snooze, and settings for reminder types, sensitivity, cooldown, voice, mirror, and optional skeleton tweening (off by default).
+4. Use pause/resume, five-minute reminder snooze, and settings for reminder types, sensitivity, cooldown, voice, mirror, and optional skeleton tweening (on by default).
 5. Finish to save a summary with monitored time, time near the reference, tracking gaps, and reminder events. History is separate from exercise sessions, and summaries can be downloaded as JSON.
 
 The camera/landmark/tweening implementation is shared through `usePoseTracker`. `src/lib/posture.ts` provides separate reference calibration, view-dependent measurements, and sustained reminder logic. `src/hooks/usePostureMonitor.ts` manages the monitoring clock, camera lifecycle, alerts, and local history. No exercise-specific full-body gate or rep counter is used in this workspace.

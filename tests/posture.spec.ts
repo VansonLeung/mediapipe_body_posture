@@ -28,12 +28,15 @@ test('workspaces coexist, profiles and bilingual settings work on desktop and mo
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(page.locator('.pm-reading')).toHaveCount(3);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  await expect(
-    page.getByRole('switch', { name: 'Smooth skeleton movement', exact: true }),
-  ).not.toBeChecked();
-  await page
-    .getByRole('switch', { name: 'Smooth skeleton movement', exact: true })
-    .check();
+  const tweening = page.getByRole('switch', {
+    name: 'Smooth skeleton movement',
+    exact: true,
+  });
+  await expect(tweening).toBeChecked();
+  await tweening.uncheck();
+  await expect(tweening).not.toBeChecked();
+  await tweening.check();
+  await expect(tweening).toBeChecked();
   await page.getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByText('繁', { exact: true }).click();
   await expect(page.locator('.pm-brand strong')).toContainText('坐姿監測');
