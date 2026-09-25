@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "march-and-high-knees",
+  "collectionId": "primary-1-3",
+  "locales": {
+    "en": {
+      "name": "March and lift higher"
+    },
+    "zh-Hant": {
+      "name": "原地踏步與高抬腿"
+    }
+  },
+  "steps": [
+    {
+      "exercise": "march-in-place",
+      "target": 0
+    },
+    {
+      "exercise": "high-knees",
+      "target": 0
+    }
+  ]
+}

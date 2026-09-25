@@ -175,6 +175,7 @@ test('desktop bundle loads both workspaces, tracks a video, persists data and fi
     await expect(
       page.getByText('Body in frame', { exact: true }),
     ).toBeVisible();
+    await page.getByText('Teacher video feedback', { exact: true }).click();
     await expect(page.locator('.timeline-track button').first()).toBeVisible();
     await expect(page.locator('.session-time strong')).not.toHaveText('00:00');
     await page

@@ -6,7 +6,6 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:5175',
     ...devices['Desktop Chrome'],
-    channel: 'chrome',
     screenshot: 'only-on-failure',
   },
   webServer: {
@@ -14,5 +13,15 @@ export default defineConfig({
     url: 'http://127.0.0.1:5175',
     reuseExistingServer: true,
   },
-  projects: [{ name: 'chromium' }],
+  projects: [
+    { name: 'chromium', use: { channel: 'chrome' } },
+    {
+      name: 'webkit-dropdowns',
+      testMatch: ['**/dropdowns.spec.ts', '**/animation.spec.ts'],
+      use: {
+        ...devices['Desktop Safari'],
+        browserName: 'webkit',
+      },
+    },
+  ],
 });

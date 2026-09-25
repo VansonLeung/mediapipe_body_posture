@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "standing-twists",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": "standing-twists"
+  },
+  "locales": {
+    "en": {
+      "name": "Gentle standing twists",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand with your feet comfortably apart, knees soft and arms relaxed.",
+        "Turn your upper body a little to one side and let your arms follow naturally. Do not fling them.",
+        "Return slowly to the middle.",
+        "Turn a little to the other side without forcing the waist or keeping the feet rigid.",
+        "Return to the middle and relax. Follow your teacher’s range and pace."
+      ],
+      "focus": "Teacher marks each turn and return; rotation depth is not automatically scored."
+    },
+    "zh-Hant": {
+      "name": "站姿輕柔扭轉",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "雙腳舒適分開，膝蓋放鬆，雙臂自然垂下。",
+        "上半身輕輕轉向一邊，讓手臂自然跟隨，不要用力甩動。",
+        "慢慢回到中間。",
+        "輕輕轉向另一邊，不要勉強扭腰或把雙腳僵硬地鎖住。",
+        "回到中間並放鬆，轉動幅度及速度跟隨老師。"
+      ],
+      "focus": "老師把每次轉動及返回中間記作一次，不會自動評估扭轉深度。"
+    }
+  }
+}

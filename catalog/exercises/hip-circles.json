@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "hip-circles",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": "hip-circles"
+  },
+  "locales": {
+    "en": {
+      "name": "Hands-on-hips hip circles",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand with your feet apart, knees soft and both hands resting lightly on your hips.",
+        "Move your pelvis a little to one side.",
+        "Continue in a small circle through the front, other side and back, without pushing into a large backbend.",
+        "Return to the starting position to complete the circle.",
+        "Make a small circle in the opposite direction. Keep breathing and follow your teacher’s count."
+      ],
+      "focus": "Teacher marks each circle and its direction. Hip circles involve depth that a frontal joint-angle score cannot verify."
+    },
+    "zh-Hant": {
+      "name": "雙手叉腰髖部畫圈",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "雙腳分開，膝蓋放鬆，雙手輕輕叉腰。",
+        "骨盆輕輕移向一邊。",
+        "以小幅度經前方、另一邊及後方畫圈，不要勉強向後拗腰。",
+        "回到起點，完成一個圈。",
+        "反方向再畫小圈，保持呼吸，次數跟隨老師。"
+      ],
+      "focus": "老師記錄每個髖部圈及方向，正面關節角度不能核實整個立體畫圈動作。"
+    }
+  }
+}

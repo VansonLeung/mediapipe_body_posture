@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "march-in-place",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": "march-in-place"
+  },
+  "locales": {
+    "en": {
+      "name": "Marching in place",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand with space around you and look ahead.",
+        "Lift one foot a little and let the opposite arm swing naturally.",
+        "Put the foot down gently and return to both feet.",
+        "Lift the other foot and continue alternating at your teacher’s pace, without hopping."
+      ],
+      "focus": "Teacher marks each foot lift and return; practise a steady alternating rhythm."
+    },
+    "zh-Hant": {
+      "name": "原地踏步",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "站在有足夠空間的位置，眼望前方。",
+        "輕輕提起一隻腳，另一邊手臂自然擺動。",
+        "輕輕放下腳，回到雙腳站立。",
+        "換另一隻腳，跟著老師的速度交替踏步，不要跳躍。"
+      ],
+      "focus": "老師把每次提腳及放下記作一次，留意交替踏步的節奏。"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "full-turn-jump",
+  "category": "Jumps & landings",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": true,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "peach",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Full-turn jump",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Show the full-turn jump taught by your teacher. Review the entire rotation and recovery.",
+        "Face the camera and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "360° 轉體跳",
+      "subtitle": "老師檢視",
+      "steps": [
+        "展示老師教授的一圈轉體跳，檢視整段旋轉及恢復過程。",
+        "面向鏡頭，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

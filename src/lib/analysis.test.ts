@@ -143,6 +143,30 @@ describe('controlled repetition counting', () => {
     counter.resetStage();
     expect(counter.update(ready)).toBe(0);
   });
+  it('records a complete visible movement separately from alignment quality', () => {
+    const counter = new RepCounter();
+    counter.update(ready);
+    counter.update({ ...raised, score: 67 });
+    counter.update(ready);
+    expect(counter.movements).toBe(1);
+    expect(counter.count).toBe(0);
+    counter.update(raised);
+    counter.update(ready);
+    expect(counter.movements).toBe(2);
+    expect(counter.count).toBe(1);
+  });
+  it('does not invent a completed movement across tracking loss or a seek', () => {
+    const counter = new RepCounter();
+    counter.update(ready);
+    counter.update(raised);
+    counter.update(blankAnalysis);
+    counter.update(ready);
+    expect(counter.movements).toBe(0);
+    counter.update(raised);
+    counter.resetStage();
+    counter.update(ready);
+    expect(counter.movements).toBe(0);
+  });
 });
 
 describe('skeleton keypoint tweening', () => {

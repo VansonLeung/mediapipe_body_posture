@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "hand-on-hip-side-stretch",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "peach",
+    "illustration": "hand-on-hip-side-stretch"
+  },
+  "locales": {
+    "en": {
+      "name": "Hand-on-hip side stretch",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand with your feet about shoulder-width apart. Rest one hand lightly on your hip without pressing into your lower back.",
+        "Reach the other arm overhead and make a small bend towards the hand on your hip. Breathe out gently.",
+        "Return to the middle and lower your arm.",
+        "Swap hands and make a small bend to the other side.",
+        "Return to the middle. Keep both feet down and use a comfortable reach."
+      ],
+      "focus": "Teacher marks each side bend and return. Hand placement is a cue, not a claim of lower-back protection."
+    },
+    "zh-Hant": {
+      "name": "單手叉腰側體伸展",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "雙腳約與肩同寬，一隻手輕放髖部，不要用力頂壓下背。",
+        "另一隻手舉過頭頂，輕輕向叉腰那邊側彎，慢慢呼氣。",
+        "回到中間，放下手臂。",
+        "交換雙手，輕輕向另一邊側彎。",
+        "回到中間，雙腳留在地上，伸展至舒適的位置。"
+      ],
+      "focus": "老師把每次側彎及返回中間記作一次；叉腰是動作提示，不代表能保護下背。"
+    }
+  }
+}

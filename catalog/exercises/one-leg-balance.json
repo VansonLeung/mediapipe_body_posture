@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "one-leg-balance",
+  "category": "Positions & balances",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 5,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "one-leg-balance",
+  "presentation": {
+    "color": "sage",
+    "illustration": "one-leg-balance"
+  },
+  "locales": {
+    "en": {
+      "name": "One-leg balance",
+      "subtitle": "Experimental shape checks",
+      "steps": [
+        "Stand on one leg and lift the other foot. Extend your arms sideways and hold.",
+        "Face the camera and keep your whole movement in view."
+      ],
+      "focus": "Checks describe visible shape only. The new checks are experimental."
+    },
+    "zh-Hant": {
+      "name": "單腳平衡",
+      "subtitle": "可見姿勢檢查",
+      "steps": [
+        "以單腳站立，抬起另一隻腳，雙臂向兩側伸展並保持姿勢。",
+        "面向鏡頭，讓整個動作保持在畫面內。"
+      ],
+      "focus": "檢查只描述可見姿勢。新增檢查仍屬實驗性質。"
+    }
+  }
+}

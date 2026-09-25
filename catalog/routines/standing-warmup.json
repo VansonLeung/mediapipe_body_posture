@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "standing-warmup",
+  "collectionId": "primary-1-3",
+  "locales": {
+    "en": {
+      "name": "Reach, bend and stand"
+    },
+    "zh-Hant": {
+      "name": "伸展、側彎、站穩"
+    }
+  },
+  "steps": [
+    {
+      "exercise": "arms",
+      "target": 4
+    },
+    {
+      "exercise": "bend",
+      "target": 4
+    },
+    {
+      "exercise": "standing-balance",
+      "target": 5
+    }
+  ]
+}

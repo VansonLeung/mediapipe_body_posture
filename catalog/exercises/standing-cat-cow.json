@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "standing-cat-cow",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": "standing-cat-cow"
+  },
+  "locales": {
+    "en": {
+      "name": "Standing cat–cow",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand with your feet a little wider than your shoulders, soften your knees and rest your hands lightly on your thighs above the knees.",
+        "As you breathe in, gently open your chest and tip your pelvis a little. Keep your neck comfortable; there is no need to look at the ceiling.",
+        "As you breathe out, gently round your back and let your chin lower a little without forcing it towards your chest.",
+        "Return to a comfortable middle position. Repeat slowly with your teacher."
+      ],
+      "focus": "Teacher marks an open-and-round cycle. A side view supports observation; joint landmarks cannot measure spinal curvature or breathing."
+    },
+    "zh-Hant": {
+      "name": "站姿貓牛式變化",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "雙腳略寬於肩，膝蓋微彎，雙手輕放在膝蓋上方的大腿。",
+        "吸氣時輕輕打開胸口，骨盆微微轉動，頸部保持舒適，不用刻意望向天花板。",
+        "呼氣時輕輕拱背，下巴稍微降低，不要勉強貼近胸口。",
+        "回到舒適的中間位置，跟著老師慢慢重複。"
+      ],
+      "focus": "老師把一次打開胸口及拱背記作一組；側面方便觀察，但關節點不能測量脊椎曲線或呼吸。"
+    }
+  }
+}

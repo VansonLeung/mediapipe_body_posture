@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "side-knee-lifts",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": "side-knee-lifts"
+  },
+  "locales": {
+    "en": {
+      "name": "Hands-on-hips side knee lifts",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand with both hands lightly on your hips and space on each side.",
+        "Lift one bent knee a little out to the side. Keep the other foot down; use a small lift.",
+        "If your teacher asks, add a very small lean towards the lifted knee without pulling or crunching hard.",
+        "Put the foot down and return to the middle.",
+        "Repeat on the other side, then return to both feet. Do not hop."
+      ],
+      "focus": "Teacher marks one lift and return and checks balance and alternating sides; this is movement practice, not a fat-loss target."
+    },
+    "zh-Hant": {
+      "name": "叉腰側提膝",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "雙手輕輕叉腰站立，左右兩邊留出空間。",
+        "把一邊屈曲的膝蓋向外側輕輕提起，另一隻腳留在地上，幅度要小。",
+        "老師指示時，可向提膝那邊微微側傾，不要用力拉扯或擠壓身體。",
+        "把腳放下，回到中間。",
+        "換另一邊，再回到雙腳站立，不要跳躍。"
+      ],
+      "focus": "老師把一次側提膝及放下記作一次，留意平衡與左右交替，以動作練習為目標。"
+    }
+  }
+}

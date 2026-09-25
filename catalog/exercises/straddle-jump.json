@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "straddle-jump",
+  "category": "Jumps & landings",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": true,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "peach",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Straddle jump",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Show a straddle shape in the air as taught by your teacher. Review the airborne shape.",
+        "Face the camera and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "劈腿跳",
+      "subtitle": "老師檢視",
+      "steps": [
+        "按老師指導在空中展示劈腿姿勢，檢視騰空形態。",
+        "面向鏡頭，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

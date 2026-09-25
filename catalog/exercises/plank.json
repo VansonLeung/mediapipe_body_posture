@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "plank",
+  "category": "Positions & balances",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "floor",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 5,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "plank",
+  "presentation": {
+    "color": "sage",
+    "illustration": "plank"
+  },
+  "locales": {
+    "en": {
+      "name": "Front support / plank",
+      "subtitle": "Experimental shape checks",
+      "steps": [
+        "With straight arms, hold your shoulders, hips and ankles in a long line. Place hands beneath shoulders.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Checks describe visible shape only. The new checks are experimental."
+    },
+    "zh-Hant": {
+      "name": "前支撐／平板",
+      "subtitle": "可見姿勢檢查",
+      "steps": [
+        "雙臂伸直，肩膀、髖部及腳踝保持一直線，雙手置於肩膀下方。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "檢查只描述可見姿勢。新增檢查仍屬實驗性質。"
+    }
+  }
+}

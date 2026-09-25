@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "elbow-bends",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "studio-authored",
+    "reference": "catalog/README.md#expanded-pilot-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 4,
+    "unit": "reps"
+  },
+  "analysisProfileId": "elbow-bends",
+  "presentation": {
+    "color": "lavender",
+    "illustration": "elbow-bends"
+  },
+  "locales": {
+    "en": {
+      "name": "Elbow bends",
+      "subtitle": "Follow along · Primary 1–3",
+      "steps": [
+        "Face the camera with your hands down and upper arms close to your sides.",
+        "Bend both elbows to bring your hands towards your shoulders. Keep your elbows low and your hands visible.",
+        "Slowly straighten your elbows and return your hands to your sides."
+      ],
+      "focus": "Move both arms together without lifting your shoulders."
+    },
+    "zh-Hant": {
+      "name": "屈伸手肘",
+      "subtitle": "跟著做 · 小一至小三",
+      "steps": [
+        "面向鏡頭，雙手放下，上臂靠近身旁。",
+        "屈曲雙肘，把手靠近肩膀；手肘保持低位，讓鏡頭看到雙手。",
+        "慢慢伸直手肘，把雙手放回身旁。"
+      ],
+      "focus": "雙臂一起移動，肩膀保持放鬆。"
+    }
+  }
+}

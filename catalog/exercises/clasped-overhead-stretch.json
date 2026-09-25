@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "clasped-overhead-stretch",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "peach",
+    "illustration": "clasped-overhead-stretch"
+  },
+  "locales": {
+    "en": {
+      "name": "Clasped-hands overhead stretch",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand with your feet apart and shoulders relaxed.",
+        "Bring your hands together and gently interlace your fingers if comfortable.",
+        "Reach your joined hands above your head, turning the palms upwards only as comfortable. Keep both feet down.",
+        "Lower your hands and relax. Follow your teacher’s pace without forcing the reach."
+      ],
+      "focus": "Teacher marks a reach and release; finger position and stretch intensity are observed manually."
+    },
+    "zh-Hant": {
+      "name": "十指交扣向上伸展",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "雙腳分開站立，肩膀放鬆。",
+        "雙手合起，舒適時可輕輕十指交扣。",
+        "雙手向頭頂上方伸展，掌心按舒適程度轉向上，雙腳留在地上。",
+        "放下雙手並放鬆，跟著老師的速度，不要勉強伸高。"
+      ],
+      "focus": "老師把一次伸展及放鬆記作一次，手指位置及伸展幅度由老師觀察。"
+    }
+  }
+}

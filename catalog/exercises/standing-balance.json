@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "standing-balance",
+  "category": "Positions & balances",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 5,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "standing-balance",
+  "presentation": {
+    "color": "sage",
+    "illustration": "standing-balance"
+  },
+  "locales": {
+    "en": {
+      "name": "Standing balance",
+      "subtitle": "Follow along · Primary 1–3",
+      "steps": [
+        "Face the camera and stand on both feet.",
+        "Reach your arms out to the sides.",
+        "Stand tall and hold your shape."
+      ],
+      "focus": "Follow your teacher and move at your own pace."
+    },
+    "zh-Hant": {
+      "name": "站立平衡",
+      "subtitle": "跟著做 · 小一至小三",
+      "steps": ["面向鏡頭，雙腳站穩。", "雙手向兩邊伸展。", "站直，保持姿勢。"],
+      "focus": "跟著老師，以自己的速度活動。"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "leap",
+  "category": "Travel",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": true,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Leap",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Show a leap from one foot to the other. Review takeoff, flight and landing.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "跨步跳",
+      "subtitle": "老師檢視",
+      "steps": [
+        "展示由一腳起跳、另一腳落地的跨步跳，檢視起跳、騰空及落地。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

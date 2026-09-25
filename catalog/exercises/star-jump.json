@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "star-jump",
+  "category": "Jumps & landings",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": true,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "peach",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Star jump",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Show a star shape with arms and legs apart in the air. Review the full attempt.",
+        "Face the camera and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "星形跳",
+      "subtitle": "老師檢視",
+      "steps": [
+        "在空中張開雙臂及雙腿，展示星形姿勢，檢視完整一次動作。",
+        "面向鏡頭，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

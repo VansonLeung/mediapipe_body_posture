@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "back-support",
+  "category": "Positions & balances",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "floor",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sage",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Back support",
+      "subtitle": "Teacher review",
+      "steps": [
+        "With hands behind you and legs forward, show the back-support shape taught by your teacher.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "後支撐",
+      "subtitle": "老師檢視",
+      "steps": [
+        "雙手置於身後，雙腿向前，展示老師教授的後支撐姿勢。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

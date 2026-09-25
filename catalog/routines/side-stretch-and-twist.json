@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "side-stretch-and-twist",
+  "collectionId": "primary-1-3",
+  "locales": {
+    "en": {
+      "name": "Side stretch and twist"
+    },
+    "zh-Hant": {
+      "name": "側體伸展與腰部扭轉"
+    }
+  },
+  "steps": [
+    {
+      "exercise": "hand-on-hip-side-stretch",
+      "target": 0
+    },
+    {
+      "exercise": "standing-twists",
+      "target": 0
+    }
+  ]
+}

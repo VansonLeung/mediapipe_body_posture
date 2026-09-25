@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "pike",
+  "category": "Positions & balances",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "floor",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 5,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "pike",
+  "presentation": {
+    "color": "sage",
+    "illustration": "pike"
+  },
+  "locales": {
+    "en": {
+      "name": "Pike position",
+      "subtitle": "Experimental shape checks",
+      "steps": [
+        "Sit with both legs straight together in front. Reach towards your toes within a comfortable range.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Checks describe visible shape only. The new checks are experimental."
+    },
+    "zh-Hant": {
+      "name": "屈體坐",
+      "subtitle": "可見姿勢檢查",
+      "steps": [
+        "坐下，雙腿併攏向前伸直，在舒適範圍內伸手靠近腳尖。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "檢查只描述可見姿勢。新增檢查仍屬實驗性質。"
+    }
+  }
+}

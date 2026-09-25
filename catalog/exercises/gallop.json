@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "gallop",
+  "category": "Travel",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": true,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Gallop",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Travel with one foot leading and the other following. Review the repeated rhythm.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "跳步",
+      "subtitle": "老師檢視",
+      "steps": [
+        "以一腳帶領，另一腳跟隨前進，檢視重複的動作節奏。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

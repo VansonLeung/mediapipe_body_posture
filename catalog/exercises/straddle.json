@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "straddle",
+  "category": "Positions & balances",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "floor",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 5,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "straddle",
+  "presentation": {
+    "color": "sage",
+    "illustration": "straddle"
+  },
+  "locales": {
+    "en": {
+      "name": "Straddle position",
+      "subtitle": "Experimental shape checks",
+      "steps": [
+        "Sit with straight legs apart and your torso upright. Use a comfortable width.",
+        "Face the camera and keep your whole movement in view."
+      ],
+      "focus": "Checks describe visible shape only. The new checks are experimental."
+    },
+    "zh-Hant": {
+      "name": "劈腿坐",
+      "subtitle": "可見姿勢檢查",
+      "steps": [
+        "坐下，雙腿伸直分開，上身保持直立，採用舒適的開腿幅度。",
+        "面向鏡頭，讓整個動作保持在畫面內。"
+      ],
+      "focus": "檢查只描述可見姿勢。新增檢查仍屬實驗性質。"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "warrior",
+  "category": "Yoga",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "original-studio",
+    "reference": "Original Movement Studio catalogue",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 30,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "warrior",
+  "presentation": {
+    "color": "sage",
+    "illustration": "warrior"
+  },
+  "locales": {
+    "en": {
+      "name": "Warrior II",
+      "subtitle": "Strength & stability",
+      "steps": [
+        "Stand with your feet wide and turn one foot outward.",
+        "Bend that knee and keep the other leg straight.",
+        "Reach both arms out at shoulder height. Face your chest toward the camera."
+      ],
+      "focus": "Ground your feet. Reach through your fingertips."
+    },
+    "zh-Hant": {
+      "name": "戰士二式",
+      "subtitle": "可見姿勢檢查",
+      "steps": [
+        "雙腳分開，將一腳向外轉。",
+        "屈曲該側膝蓋，另一腿伸直。",
+        "胸口面向鏡頭，雙臂在肩膀高度向兩側伸展。"
+      ],
+      "focus": "雙腳站穩，向指尖方向延伸。"
+    }
+  }
+}

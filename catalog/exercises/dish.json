@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "dish",
+  "category": "Positions & balances",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "floor",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sage",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Dish position",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Show a dish shape with your legs raised and your upper body lifted. Review the hold with your teacher.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "船型平衡",
+      "subtitle": "老師檢視",
+      "steps": [
+        "抬起雙腿及上身，展示船型姿勢，與老師一同檢視保持姿勢的過程。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "shoulder-circles",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "user-request-adapted",
+    "reference": "catalog/README.md#requested-morning-movements",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": "shoulder-circles"
+  },
+  "locales": {
+    "en": {
+      "name": "Shoulder circles",
+      "subtitle": "Teacher-marked movement · Primary 1–3",
+      "steps": [
+        "Stand comfortably with your arms relaxed and your head facing ahead.",
+        "Move both shoulders a little forwards.",
+        "Lift the shoulders gently.",
+        "Move them back and down to finish a small circle.",
+        "Reverse the direction: back, up, forwards, then down. Follow your teacher’s count.",
+        "Let the shoulders relax. Keep your head comfortable rather than circling your neck."
+      ],
+      "focus": "Teacher marks each complete circle and notes the direction; the camera does not score shoulder rotation."
+    },
+    "zh-Hant": {
+      "name": "肩膀繞圈",
+      "subtitle": "老師記錄動作 · 小一至小三",
+      "steps": [
+        "舒適站立，雙臂放鬆，頭部朝前。",
+        "雙肩輕輕向前移。",
+        "輕輕提起雙肩。",
+        "雙肩向後再向下，完成一個小圈。",
+        "反方向再做：向後、向上、向前、向下，次數跟隨老師。",
+        "放鬆雙肩，頭部保持舒適，不用轉動頸部畫圈。"
+      ],
+      "focus": "老師記錄每個完整肩圈及方向；鏡頭不會自動評估肩膀轉動。"
+    }
+  }
+}

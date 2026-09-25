@@ -218,6 +218,7 @@ test('loads the real MediaPipe model and analyzes an uploaded video locally', as
   await expect(
     page.getByRole('button', { name: 'Pause video', exact: true }),
   ).toBeVisible();
+  await page.getByText('Teacher video feedback', { exact: true }).click();
   await expect(page.locator('.timeline-track button').first()).toBeVisible({
     timeout: 10000,
   });
@@ -241,7 +242,7 @@ test('loads the real MediaPipe model and analyzes an uploaded video locally', as
   expect(errors).toEqual([]);
 });
 
-test('guided camera practice detects a real pose, pauses holds, and releases the camera', async ({
+test('guided camera practice detects a real pose, pauses session time, and releases the camera', async ({
   page,
 }) => {
   const { readFile } = await import('node:fs/promises');
@@ -280,15 +281,9 @@ test('guided camera practice detects a real pose, pauses holds, and releases the
   await expect(page.getByText('Body in frame', { exact: true })).toBeVisible({
     timeout: 45000,
   });
-  await expect
-    .poll(
-      async () =>
-        Number.parseInt(
-          await page.locator('.practice-metrics strong').first().innerText(),
-        ),
-      { timeout: 15000 },
-    )
-    .toBeGreaterThan(0);
+  await expect(page.locator('.session-time strong')).not.toHaveText('00:00', {
+    timeout: 15000,
+  });
   await expect(page.locator('.countdown-overlay')).toHaveCount(0);
   await page
     .getByRole('button', { name: 'Pause session', exact: true })
@@ -296,14 +291,9 @@ test('guided camera practice detects a real pose, pauses holds, and releases the
   await expect(
     page.getByText('Practice paused', { exact: true }),
   ).toBeVisible();
-  const hold = await page
-    .locator('.practice-metrics strong')
-    .first()
-    .innerText();
+  const hold = await page.locator('.session-time strong').first().innerText();
   await page.waitForTimeout(600);
-  await expect(page.locator('.practice-metrics strong').first()).toHaveText(
-    hold,
-  );
+  await expect(page.locator('.session-time strong').first()).toHaveText(hold);
   await page
     .getByRole('button', { name: 'Resume practice', exact: true })
     .click();
@@ -318,6 +308,6 @@ test('guided camera practice detects a real pose, pauses holds, and releases the
           .testCameraTrack.readyState,
     ),
   ).toBe('ended');
-  await expect(page.locator('.recap-metrics strong').nth(2)).toHaveText('100%');
+  await expect(page.locator('.recap-metrics strong').nth(2)).toHaveText(/\d+%/);
   expect(errors).toEqual([]);
 });

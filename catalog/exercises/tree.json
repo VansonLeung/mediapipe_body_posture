@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "tree",
+  "category": "Yoga",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "original-studio",
+    "reference": "Original Movement Studio catalogue",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 30,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "tree",
+  "presentation": {
+    "color": "sand",
+    "illustration": "tree"
+  },
+  "locales": {
+    "en": {
+      "name": "Tree pose",
+      "subtitle": "Balance & focus",
+      "steps": [
+        "Face the camera and shift your weight onto one leg.",
+        "Place your other foot on your ankle or calf, avoiding the knee.",
+        "Bring your palms together and keep your standing leg tall."
+      ],
+      "focus": "Find a still point and take a steady breath."
+    },
+    "zh-Hant": {
+      "name": "樹式",
+      "subtitle": "可見姿勢檢查",
+      "steps": [
+        "面向鏡頭，將重心移至一腿。",
+        "另一腳放於腳踝或小腿旁，避開膝蓋。",
+        "雙掌合十，站立腿保持伸展。"
+      ],
+      "focus": "注視固定位置，平穩呼吸。"
+    }
+  }
+}

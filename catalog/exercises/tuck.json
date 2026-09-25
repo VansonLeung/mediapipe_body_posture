@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "tuck",
+  "category": "Positions & balances",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "floor",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 5,
+    "unit": "seconds"
+  },
+  "analysisProfileId": "tuck",
+  "presentation": {
+    "color": "sage",
+    "illustration": "tuck"
+  },
+  "locales": {
+    "en": {
+      "name": "Tuck position",
+      "subtitle": "Experimental shape checks",
+      "steps": [
+        "Bring your knees towards your chest and your arms around your legs. Hold the compact shape.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Checks describe visible shape only. The new checks are experimental."
+    },
+    "zh-Hant": {
+      "name": "抱膝坐",
+      "subtitle": "可見姿勢檢查",
+      "steps": [
+        "雙膝靠近胸口，雙臂環抱雙腿，保持收攏的姿勢。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "檢查只描述可見姿勢。新增檢查仍屬實驗性質。"
+    }
+  }
+}

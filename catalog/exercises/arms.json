@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "arms",
+  "category": "Warm-up",
+  "publication": "published",
+  "contentReview": "pending",
+  "intendedAudience": ["primary-1-3"],
+  "source": {
+    "kind": "original-studio",
+    "reference": "Original Movement Studio catalogue",
+    "status": "unvalidated"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "front"
+  },
+  "defaults": {
+    "target": 4,
+    "unit": "reps"
+  },
+  "analysisProfileId": "arms",
+  "presentation": {
+    "color": "lavender",
+    "illustration": "arms"
+  },
+  "locales": {
+    "en": {
+      "name": "Arm raises",
+      "subtitle": "Follow along · Primary 1–3",
+      "steps": [
+        "Stand facing the camera with your arms by your sides.",
+        "Slowly lift both arms out to shoulder height.",
+        "Bring them back down. That is one movement."
+      ],
+      "focus": "Follow your teacher and move at your own pace."
+    },
+    "zh-Hant": {
+      "name": "手臂平舉",
+      "subtitle": "跟著做 · 小一至小三",
+      "steps": [
+        "面向鏡頭站立，雙手放在身旁。",
+        "慢慢向兩側抬起雙手，與肩膀同高。",
+        "把雙手放下，完成一次動作。"
+      ],
+      "focus": "跟著老師，以自己的速度活動。"
+    }
+  }
+}

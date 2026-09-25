@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "landing",
+  "category": "Jumps & landings",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": true,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "peach",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Safe landing",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Review knee bending, arm position and steadiness after landing with your teacher. Video does not measure impact force.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "安全落地",
+      "subtitle": "老師檢視",
+      "steps": [
+        "與老師檢視落地後的屈膝、手臂位置及穩定度。影片無法測量衝擊力。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

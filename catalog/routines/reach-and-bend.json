@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "reach-and-bend",
+  "collectionId": "primary-1-3",
+  "locales": {
+    "en": {
+      "name": "Reach and bend"
+    },
+    "zh-Hant": {
+      "name": "向上伸展與屈肘"
+    }
+  },
+  "steps": [
+    {
+      "exercise": "overhead-reach",
+      "target": 4
+    },
+    {
+      "exercise": "elbow-bends",
+      "target": 4
+    },
+    {
+      "exercise": "standing-balance",
+      "target": 5
+    }
+  ]
+}

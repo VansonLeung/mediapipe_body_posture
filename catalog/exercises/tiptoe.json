@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "tiptoe",
+  "category": "Travel",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "standing",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "sand",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Tiptoe",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Travel on the balls of your feet. Keep your feet visible for review.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "踮腳走",
+      "subtitle": "老師檢視",
+      "steps": [
+        "以前腳掌踮腳前進，讓雙腳保持在鏡頭範圍內以便檢視。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

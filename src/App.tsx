@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import zhHK from 'antd/locale/zh_HK';
+import enUS from 'antd/locale/en_US';
 import {
   Alert,
   Button,
@@ -45,17 +47,37 @@ import {
   Upload,
   Monitor,
 } from 'lucide-react';
-import { exercises, getExercise } from './lib/exercises';
-import type { ExerciseId } from './lib/exercises';
+import {
+  exercises as allExercises,
+  availableExercises,
+  activeCollection,
+  isAvailableExercise,
+  getExercise as getRawExercise,
+  localizeExercise,
+} from './catalog';
+import { translateStudio } from './lib/studioLanguage';
+import { categoryZh } from './catalog';
+import type { StudioLanguage } from './catalog';
+import {
+  canStartRoutine,
+  parseRoutines,
+  routineStorageKey,
+} from './lib/routines';
+import type { Routine } from './lib/routines';
+import { RoutineBuilder } from './components/RoutineBuilder';
+import { TeacherReview, reviewTime } from './components/TeacherReview';
+import type { ExerciseId } from './catalog';
 import { formatTime } from './lib/analysis';
 import type { SessionRecord } from './lib/analysis';
 import { usePoseTracker } from './hooks/usePoseTracker';
 import { useSession } from './hooks/useSession';
+import { MovementDemo } from './components/MovementDemo';
 import { PoseArt } from './components/PoseArt';
 
 import { popupContainer, useAppFullscreen } from './hooks/useAppFullscreen';
+import { useDropdownLayer } from './hooks/useDropdownLayer';
 
-type Page = 'studio' | 'library' | 'history';
+type Page = 'studio' | 'library' | 'history' | 'routines';
 function readHistory(): SessionRecord[] {
   try {
     const data: unknown = JSON.parse(
@@ -68,13 +90,36 @@ function readHistory(): SessionRecord[] {
               v &&
               typeof v.id === 'string' &&
               typeof v.date === 'string' &&
-              exercises.some((e) => e.id === v.exercise) &&
+              allExercises.some((e) => e.id === v.exercise) &&
               Number.isFinite(v.duration) &&
               Number.isFinite(v.hold) &&
               Number.isFinite(v.reps) &&
               (v.score === null || Number.isFinite(v.score)) &&
               Array.isArray(v.cues) &&
               v.cues.every((c: unknown) => typeof c === 'string') &&
+              (v.assessment === undefined ||
+                ['automatic', 'review'].includes(v.assessment)) &&
+              (v.notes === undefined || typeof v.notes === 'string') &&
+              (v.alignedReps === undefined ||
+                (Number.isInteger(v.alignedReps) && v.alignedReps >= 0)) &&
+              (v.attempts === undefined ||
+                (Array.isArray(v.attempts) &&
+                  v.attempts.every(
+                    (a: { time?: unknown; note?: unknown } | null) =>
+                      a &&
+                      typeof a.time === 'number' &&
+                      Number.isFinite(a.time) &&
+                      a.time >= 0 &&
+                      typeof a.note === 'string',
+                  ))) &&
+              (v.routine === undefined ||
+                (v.routine &&
+                  typeof v.routine.id === 'string' &&
+                  typeof v.routine.name === 'string' &&
+                  Number.isInteger(v.routine.step) &&
+                  Number.isInteger(v.routine.total) &&
+                  v.routine.step >= 1 &&
+                  v.routine.step <= v.routine.total)) &&
               ['camera', 'video'].includes(v.source),
           )
           .slice(0, 100)
@@ -84,9 +129,37 @@ function readHistory(): SessionRecord[] {
   }
 }
 export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
+  const [language, setLanguage] = useState<StudioLanguage>(() => {
+    try {
+      return localStorage.getItem('forma-studio-language') === 'zh-Hant'
+        ? 'zh-Hant'
+        : 'en';
+    } catch {
+      return 'en';
+    }
+  });
+  const tr = (text: string) => translateStudio(text, language);
+  const t = (en: string, zh: string) => (language === 'en' ? en : zh);
+  const exercises = availableExercises.map((e) =>
+    localizeExercise(e, language),
+  );
+  const getExercise = (id: ExerciseId) =>
+    localizeExercise(getRawExercise(id), language);
+  const [routines, setRoutines] = useState<Routine[]>(() => {
+    try {
+      return parseRoutines(localStorage.getItem(routineStorageKey) ?? '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [run, setRun] = useState<{ routine: Routine; index: number } | null>(
+    null,
+  );
   const [page, setPage] = useState<Page>('studio');
   const [mode, setMode] = useState<'guided' | 'free'>('guided');
-  const [selected, setSelected] = useState<ExerciseId>('warrior');
+  const [selected, setSelected] = useState<ExerciseId>(
+    availableExercises[0].id,
+  );
   const [source, setSource] = useState<'camera' | 'video'>('camera');
   const [overlay, setOverlay] = useState(true),
     [tweening, setTweening] = useState(true),
@@ -103,7 +176,26 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
     studioRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<HTMLDivElement>(null);
   const { fullscreen, toggleFullscreen } = useAppFullscreen(appRef);
-  const exercise = getExercise(selected);
+  const dropdownContainer = useDropdownLayer();
+  const baseExercise = getExercise(selected);
+  const stepTarget = run?.routine.steps[run.index].target;
+  const exercise =
+    stepTarget && baseExercise.support === 'automatic'
+      ? {
+          ...baseExercise,
+          target: stepTarget,
+          duration: `${stepTarget} ${baseExercise.unit === 'seconds' ? t('sec hold', '秒保持') : t('reps', '次動作')}`,
+        }
+      : baseExercise;
+  const reviewOnly = exercise.support === 'review';
+  function storeRoutines(next: Routine[]) {
+    setRoutines(next);
+    try {
+      localStorage.setItem(routineStorageKey, JSON.stringify(next));
+    } catch {
+      setStorageWarning(true);
+    }
+  }
   const save = (record: SessionRecord) => {
     setHistory((prev) => {
       const next = [record, ...prev].slice(0, 100);
@@ -115,7 +207,21 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
       return next;
     });
   };
-  const session = useSession(exercise, mode, tolerance, source, save);
+  const session = useSession(
+    exercise,
+    mode,
+    tolerance,
+    source,
+    save,
+    run
+      ? {
+          id: run.routine.id,
+          name: run.routine.name,
+          step: run.index + 1,
+          total: run.routine.steps.length,
+        }
+      : undefined,
+  );
   const tracker = usePoseTracker({
     overlay,
     tweening,
@@ -127,22 +233,31 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
   useEffect(() => {
     if (
       sound &&
+      !reviewOnly &&
       active &&
       !session.paused &&
-      session.analysis.cue !== lastSpoken.current &&
+      tr(session.coaching.cue) !== lastSpoken.current &&
       'speechSynthesis' in window
     ) {
-      lastSpoken.current = session.analysis.cue;
+      lastSpoken.current = tr(session.coaching.cue);
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(session.analysis.cue);
+      const utterance = new SpeechSynthesisUtterance(tr(session.coaching.cue));
+      utterance.lang = language === 'zh-Hant' ? 'zh-HK' : 'en-GB';
       utterance.rate = 0.88;
       window.speechSynthesis.speak(utterance);
     }
-    if (!sound || !active || session.paused) {
+    if (!sound || reviewOnly || !active || session.paused) {
       window.speechSynthesis?.cancel();
       lastSpoken.current = '';
     }
-  }, [sound, active, session.paused, session.analysis.cue]);
+  }, [
+    sound,
+    active,
+    session.paused,
+    session.coaching.cue,
+    language,
+    reviewOnly,
+  ]);
   useEffect(() => () => window.speechSynthesis?.cancel(), []);
   useEffect(() => {
     if (tracker.status === 'error' && active) {
@@ -179,13 +294,35 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
     session.reset();
     setMode(next);
   }
-  function chooseExercise(id: ExerciseId) {
+  function chooseExercise(id: ExerciseId, keepRoutine = false) {
+    if (!isAvailableExercise(id)) return;
+    if (!keepRoutine) setRun(null);
     if (active) session.finish();
     session.reset();
     setSelected(id);
     if (page !== 'studio') setPage('studio');
   }
+  function startRoutine(routine: Routine) {
+    if (!canStartRoutine(routine)) return;
+    chooseExercise(routine.steps[0].exercise, true);
+    setRun({ routine, index: 0 });
+    setMode('guided');
+  }
+  function nextRoutineStep() {
+    if (!run || !canStartRoutine(run.routine)) return;
+    session.setRecap(null);
+    if (run.index + 1 >= run.routine.steps.length) {
+      setRun(null);
+      session.reset();
+      setPage('routines');
+    } else {
+      const index = run.index + 1;
+      chooseExercise(run.routine.steps[index].exercise, true);
+      setRun({ routine: run.routine, index });
+    }
+  }
   async function begin() {
+    if (!isAvailableExercise(selected)) return;
     session.begin();
     if (!tracker.media) {
       if (source === 'camera') await tracker.startCamera();
@@ -240,53 +377,90 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
       ? session.stats.reps
       : Math.floor(session.stats.hold);
   const hasTracking = tracker.status === 'ready' && session.analysis.visible;
+  const hasCoachingTracking =
+    tracker.status === 'ready' && session.coaching.visible;
   const elapsed = formatTime(session.stats.duration);
+  const recapIsCurrentStep =
+    !!run &&
+    session.recap?.routine?.id === run.routine.id &&
+    session.recap.routine.step === run.index + 1 &&
+    session.phase === 'complete';
   const selectedIndex = exercises.findIndex((e) => e.id === selected);
   return (
     <ConfigProvider
+      locale={language === 'zh-Hant' ? zhHK : enUS}
       getPopupContainer={popupContainer}
       theme={{ token: { borderRadius: 5, controlHeight: 32 } }}
     >
-      <div className="app-shell" ref={appRef}>
+      <div className="app-shell" ref={appRef} lang={language}>
         <header className="studio-header">
           <h1>
-            <Activity size={19} /> Movement Studio
+            <Activity size={19} />
+            {tr('Movement Studio')}
           </h1>
-          <nav aria-label="Main navigation">
+          <nav aria-label={tr('Main navigation')}>
             <button
-              aria-label="Movement studio"
+              aria-label={tr('Movement studio')}
               aria-current={page === 'studio' ? 'page' : undefined}
               className={page === 'studio' ? 'selected' : ''}
               onClick={() => navigate('studio')}
             >
               <LayoutGrid size={16} />
-              <span>Practice</span>
+              <span>{tr('Practice')}</span>
             </button>
             <button
-              aria-label="Exercise library"
+              aria-label={tr('Exercise library')}
               aria-current={page === 'library' ? 'page' : undefined}
               className={page === 'library' ? 'selected' : ''}
               onClick={() => navigate('library')}
             >
               <Flower2 size={16} />
-              <span>Exercises</span>
+              <span>{t('Exercises', '動作')}</span>
             </button>
             <button
-              aria-label="My progress"
+              aria-label={tr('My progress')}
               aria-current={page === 'history' ? 'page' : undefined}
               className={page === 'history' ? 'selected' : ''}
               onClick={() => navigate('history')}
             >
               <History size={16} />
-              <span>History</span>
+              <span>{tr('History')}</span>
               {history.length > 0 && <small>{history.length}</small>}
+            </button>
+            <button
+              aria-label={t('Movement combinations', '動作組合')}
+              aria-current={page === 'routines' ? 'page' : undefined}
+              className={page === 'routines' ? 'selected' : ''}
+              onClick={() => navigate('routines')}
+            >
+              <ListVideo size={16} />
+              <span>{t('Combinations', '組合')}</span>
             </button>
           </nav>
           <div className="studio-header-actions">
+            <Select
+              size="small"
+              aria-label="Language / 語言"
+              getPopupContainer={dropdownContainer}
+              popupMatchSelectWidth={96}
+              value={language}
+              onChange={(value: StudioLanguage) => {
+                setLanguage(value);
+                try {
+                  localStorage.setItem('forma-studio-language', value);
+                } catch {
+                  setStorageWarning(true);
+                }
+              }}
+              options={[
+                { value: 'en', label: 'EN' },
+                { value: 'zh-Hant', label: '繁中' },
+              ]}
+            />
             <button
               className="text-button workspace-link"
-              aria-label="Posture Monitor"
-              title="Posture Monitor"
+              aria-label={tr('Posture Monitor')}
+              title={tr('Posture Monitor')}
               onClick={() => {
                 if (active) session.finish();
                 tracker.stop();
@@ -294,19 +468,21 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
               }}
             >
               <Monitor size={17} />
-              <span>Posture Monitor</span>
+              <span>{tr('Posture Monitor')}</span>
             </button>
             <Button
               type="text"
-              aria-label="Setup guide"
-              title="Setup guide"
+              aria-label={tr('Setup guide')}
+              title={tr('Setup guide')}
               icon={<CircleHelp size={17} />}
               onClick={() => setHelp(true)}
             />
             <Button
               type="text"
-              aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen app'}
-              title={fullscreen ? 'Exit fullscreen' : 'Fullscreen app'}
+              aria-label={
+                fullscreen ? tr('Exit fullscreen') : tr('Fullscreen app')
+              }
+              title={fullscreen ? tr('Exit fullscreen') : tr('Fullscreen app')}
               icon={
                 fullscreen ? <Minimize size={17} /> : <Maximize size={17} />
               }
@@ -314,8 +490,8 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
             />
             <Button
               type="text"
-              aria-label="Preferences"
-              title="Preferences"
+              aria-label={tr('Preferences')}
+              title={tr('Preferences')}
               icon={<Settings2 size={17} />}
               onClick={() => setSettings(true)}
             />
@@ -329,7 +505,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
               <div
                 className="workspace-tabs"
                 role="tablist"
-                aria-label="Studio mode"
+                aria-label={tr('Studio mode')}
               >
                 <button
                   role="tab"
@@ -338,7 +514,9 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                   onClick={() => changeMode('guided')}
                 >
                   <Sparkles size={17} />
-                  Guided practice
+                  {reviewOnly
+                    ? t('Teacher review', '老師檢視')
+                    : tr('Guided practice')}
                 </button>
                 <button
                   role="tab"
@@ -347,40 +525,70 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                   onClick={() => changeMode('free')}
                 >
                   <ScanLine size={18} />
-                  Open analysis
+                  {tr('Open analysis')}
                 </button>
+                <span className="collection-label">
+                  {activeCollection.locales[language].name}
+                </span>
               </div>
               <div
                 className="exercise-picker"
                 role="group"
-                aria-label="Exercise"
+                aria-label={tr('Exercise')}
               >
-                <span>Exercise</span>
-                {exercises.map((e) => (
-                  <button
-                    key={e.id}
-                    aria-pressed={selected === e.id}
-                    className={selected === e.id ? 'chosen' : ''}
-                    onClick={() => chooseExercise(e.id)}
-                  >
-                    {e.name}
-                    <small>{e.duration}</small>
-                    {selected === e.id && <Check size={13} />}
-                  </button>
-                ))}
+                <span>{tr('Exercise')}</span>
+                <Select
+                  className="movement-select"
+                  aria-label={t('Choose exercise', '選擇動作')}
+                  getPopupContainer={dropdownContainer}
+                  virtual={false}
+                  showSearch
+                  optionFilterProp="label"
+                  value={selected}
+                  onChange={(id) => chooseExercise(id)}
+                  options={exercises.map((e) => ({
+                    value: e.id,
+                    label: `${e.name} · ${e.support === 'review' ? t('Teacher review', '老師檢視') : run && e.id === selected ? exercise.duration : e.duration}`,
+                  }))}
+                />
                 <button
                   className="text-button"
                   onClick={() => setInstructions(true)}
                 >
                   <CircleHelp size={14} />
-                  Pose guide
+                  {tr('Pose guide')}
                 </button>
               </div>
+              {run && (
+                <div className="routine-progress" role="status">
+                  <strong>{run.routine.name}</strong>
+                  <span>
+                    {t('Step', '步驟')} {run.index + 1} /{' '}
+                    {run.routine.steps.length} · {exercise.name}
+                  </span>
+                  {session.phase === 'complete' && (
+                    <Button size="small" onClick={nextRoutineStep}>
+                      {run.index + 1 < run.routine.steps.length
+                        ? t('Next step', '下一步')
+                        : t('Finish combination', '完成組合')}
+                    </Button>
+                  )}
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      if (active) finish();
+                      setRun(null);
+                    }}
+                  >
+                    {t('Exit combination', '離開組合')}
+                  </Button>
+                </div>
+              )}
               <div className="studio-grid">
                 <section className="camera-panel" ref={studioRef}>
                   <div className="panel-toolbar">
                     <Segmented
-                      aria-label="Input source"
+                      aria-label={tr('Input source')}
                       value={source}
                       onChange={(value) =>
                         changeSource(value as 'camera' | 'video')
@@ -390,7 +598,8 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           value: 'camera',
                           label: (
                             <span className="inline">
-                              <Camera size={15} /> Live camera
+                              <Camera size={15} />
+                              {tr('Live camera')}
                             </span>
                           ),
                         },
@@ -398,17 +607,18 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           value: 'video',
                           label: (
                             <span className="inline">
-                              <Upload size={15} /> Upload video
+                              <Upload size={15} />
+                              {tr('Upload video')}
                             </span>
                           ),
                         },
                       ]}
                     />
                     <div className="toolbar-right">
-                      <Tooltip title="Expand preview">
+                      <Tooltip title={tr('Expand preview')}>
                         <Button
                           type="text"
-                          aria-label="Expand preview"
+                          aria-label={tr('Expand preview')}
                           icon={<Expand size={17} />}
                           onClick={() => {
                             if (document.fullscreenElement)
@@ -439,24 +649,27 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           className={`status-dot ${hasTracking ? 'green' : ''}`}
                         />
                         {tracker.status === 'loading'
-                          ? 'Loading model'
+                          ? tr('Loading model')
                           : tracker.media
-                            ? hasTracking
-                              ? 'Body in frame'
-                              : 'Body not in frame'
-                            : 'Camera off'}
+                            ? reviewOnly
+                              ? t('Teacher review', '老師檢視')
+                              : hasTracking
+                                ? tr('Body in frame')
+                                : tr('Body not in frame')
+                            : tr('Camera off')}
                       </span>
                       <span className="stage-quality">
                         {tracker.media ? (
                           <>
                             <Activity size={13} />{' '}
                             {tracker.status === 'ready'
-                              ? 'Tracking ready'
-                              : 'Loading model'}
+                              ? tr('Tracking ready')
+                              : tr('Loading model')}
                           </>
                         ) : (
                           <>
-                            <ScanLine size={13} /> POSE TRACKING
+                            <ScanLine size={13} />
+                            {tr('POSE TRACKING')}
                           </>
                         )}
                       </span>
@@ -474,13 +687,13 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         preload="auto"
                         aria-label={
                           source === 'camera'
-                            ? 'Live camera preview'
-                            : 'Uploaded video preview'
+                            ? tr('Live camera preview')
+                            : tr('Uploaded video preview')
                         }
                       />
                       <canvas
                         ref={tracker.canvasRef}
-                        aria-label="Body landmark overlay"
+                        aria-label={tr('Body landmark overlay')}
                       />
                     </div>
                     {!tracker.media && (
@@ -492,13 +705,15 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         )}
                         <h3>
                           {source === 'camera'
-                            ? 'Camera preview'
-                            : 'Video analysis'}
+                            ? tr('Camera preview')
+                            : tr('Video analysis')}
                         </h3>
                         <p>
                           {source === 'camera'
-                            ? 'Enable the camera with your full body in view.'
-                            : 'Choose or drop a video here.'}
+                            ? tr(
+                                'Enable the camera with your full body in view.',
+                              )
+                            : tr('Choose or drop a video here.')}
                         </p>
                         <Button
                           className="enable-button"
@@ -517,21 +732,23 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           }
                         >
                           {source === 'camera'
-                            ? 'Enable camera'
-                            : 'Choose a video'}
+                            ? tr('Enable camera')
+                            : tr('Choose a video')}
                         </Button>
                         <span className="camera-small">
                           {source === 'camera'
-                            ? 'Processed on your device'
-                            : 'MP4, WebM or MOV · up to 500 MB · stays on your device'}
+                            ? tr('Processed on your device')
+                            : tr(
+                                'MP4, WebM or MOV · up to 500 MB · stays on your device',
+                              )}
                         </span>
                       </div>
                     )}
                     {tracker.media && tracker.status === 'loading' && (
                       <div className="loading-overlay">
                         <div className="loading-orbit" />
-                        <h3>Loading pose tracking…</h3>
-                        <p>Loading the pose model on your device.</p>
+                        <h3>{tr('Loading pose tracking…')}</h3>
+                        <p>{tr('Loading the pose model on your device.')}</p>
                       </div>
                     )}
                     {tracker.media &&
@@ -547,37 +764,40 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           </span>
                           <p>
                             {session.analysis.visible
-                              ? 'Hold still for the countdown.'
-                              : 'Step back so your full body is visible.'}
+                              ? tr('Hold still for the countdown.')
+                              : tr(session.analysis.cue)}
                           </p>
                         </div>
                       )}
                     {session.phase === 'rest' && (
                       <div className="countdown-overlay rest">
                         <Leaf size={28} />
-                        <h3>Rest</h3>
+                        <h3>{tr('Rest')}</h3>
                         <span>{session.restTime}</span>
                         <p>
-                          You’ve completed your{' '}
-                          {exercise.unit === 'reps' ? 'repetitions' : 'hold'}.
+                          {tr('You’ve completed your')}{' '}
+                          {exercise.unit === 'reps'
+                            ? tr('repetitions')
+                            : tr('hold')}
+                          .
                         </p>
                       </div>
                     )}
                     {session.paused && tracker.media && (
                       <div className="paused-overlay">
                         <Pause size={24} />
-                        <span>Practice paused</span>
-                        <Button onClick={pause}>Resume practice</Button>
+                        <span>{tr('Practice paused')}</span>
+                        <Button onClick={pause}>{tr('Resume practice')}</Button>
                       </div>
                     )}
                     <div className="stage-bottom">
                       <span>
                         <Focus size={15} />
                         {source === 'camera'
-                          ? 'Keep your whole body in view'
+                          ? tr('Keep your whole body in view')
                           : tracker.media?.kind === 'video'
                             ? tracker.media.name
-                            : 'A full-body view works best'}
+                            : tr('A full-body view works best')}
                       </span>
                       {tracker.media && source === 'camera' && (
                         <button
@@ -587,14 +807,15 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                             tracker.stop();
                           }}
                         >
-                          <Square size={12} /> Camera off
+                          <Square size={12} />
+                          {tr('Camera off')}
                         </button>
                       )}
                     </div>
                   </div>
                   {tracker.error && (
                     <Alert
-                      title={tracker.error}
+                      title={tr(tracker.error)}
                       type="warning"
                       showIcon
                       closable
@@ -606,7 +827,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                       <Button
                         type="text"
                         aria-label={
-                          tracker.playing ? 'Pause video' : 'Play video'
+                          tracker.playing ? tr('Pause video') : tr('Play video')
                         }
                         disabled={tracker.status !== 'ready'}
                         icon={
@@ -620,20 +841,55 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                       />
                       <span>{formatTime(tracker.time)}</span>
                       <Slider
-                        aria-label="Video position"
+                        aria-label={tr('Video position')}
                         value={tracker.time}
                         max={tracker.duration || 1}
-                        step={0.1}
+                        step={0.01}
                         tooltip={{
                           formatter: (value) => formatTime(value ?? 0),
                         }}
                         onChange={tracker.seek}
                       />
                       <span>{formatTime(tracker.duration)}</span>
-                      <Tooltip title="Change video">
+                      <Select
+                        size="small"
+                        aria-label={t('Playback speed', '播放速度')}
+                        defaultValue={1}
+                        onChange={(value) => {
+                          if (tracker.videoRef.current)
+                            tracker.videoRef.current.playbackRate = value;
+                        }}
+                        options={[0.25, 0.5, 1].map((value) => ({
+                          value,
+                          label: `${value}×`,
+                        }))}
+                      />
+                      <Button
+                        size="small"
+                        aria-label={t('Back 0.1 seconds', '後退 0.1 秒')}
+                        onClick={() => {
+                          if (tracker.playing) tracker.togglePlay();
+                          tracker.seek(Math.max(0, tracker.time - 0.1));
+                        }}
+                      >
+                        −0.1s
+                      </Button>
+                      <Button
+                        size="small"
+                        aria-label={t('Forward 0.1 seconds', '前進 0.1 秒')}
+                        onClick={() => {
+                          if (tracker.playing) tracker.togglePlay();
+                          tracker.seek(
+                            Math.min(tracker.duration, tracker.time + 0.1),
+                          );
+                        }}
+                      >
+                        +0.1s
+                      </Button>
+                      <Tooltip title={tr('Change video')}>
                         <Button
                           type="text"
-                          aria-label="Change video"
+                          aria-label={tr('Change video')}
                           icon={<Upload size={15} />}
                           onClick={() => uploadRef.current?.click()}
                         />
@@ -647,7 +903,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         checked={overlay}
                         onChange={setOverlay}
                       />{' '}
-                      Skeleton overlay
+                      {tr('Skeleton overlay')}
                     </label>
                     <label>
                       <Switch
@@ -656,14 +912,16 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         onChange={setMirror}
                         disabled={source === 'video'}
                       />{' '}
-                      Mirror view
+                      {tr('Mirror view')}
                     </label>
                     <button
                       className={`text-button audio-button ${sound ? 'on' : ''}`}
                       onClick={() => setSound(!sound)}
                     >
                       <AudioLines size={15} />
-                      <span>Voice cues {sound ? 'on' : 'off'}</span>
+                      <span>
+                        {tr('Voice cues')} {tr(sound ? 'on' : 'off')}
+                      </span>
                     </button>
                   </div>
                   <div className="session-bar">
@@ -673,10 +931,10 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                     <div className="session-time">
                       <span>
                         {active
-                          ? 'SESSION IN PROGRESS'
+                          ? tr('SESSION IN PROGRESS')
                           : session.phase === 'complete'
-                            ? 'SESSION COMPLETE'
-                            : 'READY'}
+                            ? tr('SESSION COMPLETE')
+                            : tr('READY')}
                       </span>
                       <strong>
                         {active || session.phase === 'complete'
@@ -692,15 +950,15 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           <Tooltip
                             title={
                               session.paused
-                                ? 'Resume session'
-                                : 'Pause session'
+                                ? tr('Resume session')
+                                : tr('Pause session')
                             }
                           >
                             <Button
                               aria-label={
                                 session.paused
-                                  ? 'Resume session'
-                                  : 'Pause session'
+                                  ? tr('Resume session')
+                                  : tr('Pause session')
                               }
                               icon={
                                 session.paused ? (
@@ -717,7 +975,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                             icon={<Square size={13} />}
                             onClick={finish}
                           >
-                            Finish session
+                            {tr('Finish session')}
                           </Button>
                         </>
                       ) : (
@@ -730,10 +988,12 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           onClick={() => void begin()}
                         >
                           {session.phase === 'complete'
-                            ? 'Practice again'
-                            : mode === 'guided'
-                              ? 'Start guided session'
-                              : 'Start analysis'}
+                            ? tr('Practice again')
+                            : reviewOnly
+                              ? t('Start review', '開始檢視')
+                              : mode === 'guided'
+                                ? tr('Start guided session')
+                                : tr('Start analysis')}
                           <ArrowRight size={16} />
                         </Button>
                       )}
@@ -745,171 +1005,249 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                     <div className="coach-symbol">
                       <Sparkles size={18} />
                     </div>
-                    <h2>Measurements</h2>
-                    <Tooltip title="Feedback is based on visible joint angles. A single camera cannot assess every aspect of a pose.">
+                    <h2>
+                      {reviewOnly
+                        ? t('Teacher review', '老師檢視')
+                        : t('Follow along', '跟著做')}
+                    </h2>
+                    <Tooltip
+                      title={tr(
+                        'Feedback is based on visible joint angles. A single camera cannot assess every aspect of a pose.',
+                      )}
+                    >
                       <CircleHelp size={15} />
                     </Tooltip>
                   </div>
                   <div className="current-exercise">
                     <span className="eyebrow">
-                      {mode === 'guided' ? 'EXERCISE' : 'ANALYZING'}
+                      {mode === 'guided' ? tr('EXERCISE') : tr('ANALYZING')}
                     </span>
                     <h3>{exercise.name}</h3>
                     <span>{exercise.subtitle}</span>
+                    <p className="camera-guidance">
+                      {exercise.camera === 'front'
+                        ? t('Camera: front view', '鏡頭：正面')
+                        : t('Camera: side view', '鏡頭：側面')}
+                    </p>
                     <button
                       className="text-button pose-instructions"
                       onClick={() => setInstructions(true)}
                     >
-                      View pose guide <ArrowRight size={12} />
+                      {tr('View pose guide')}
+                      <ArrowRight size={12} />
                     </button>
                   </div>
-                  <div
-                    className={`coaching-cue ${hasTracking ? 'tracking' : ''}`}
-                  >
-                    <div>
-                      <span className="cue-dot" />
-                      <strong>
-                        {session.paused
-                          ? 'Paused'
-                          : session.phase === 'rest'
-                            ? 'Target completed'
-                            : hasTracking
-                              ? session.analysis.score === 100
-                                ? 'Checks met'
-                                : 'Adjustment needed'
-                              : 'Awaiting tracking'}
-                      </strong>
-                    </div>
-                    <p>
-                      {session.paused
-                        ? 'Resume to continue measurements.'
-                        : session.phase === 'rest'
-                          ? 'Relax your arms, release the pose, and breathe.'
-                          : tracker.media
-                            ? session.analysis.cue
-                            : 'Enable the camera or load a video to see measurements.'}
-                    </p>
-                  </div>
-                  <div className="alignment-heading">
-                    <span>Alignment check</span>
-                    <span
-                      className={`tracking-state ${hasTracking ? 'live' : ''}`}
-                    >
-                      {hasTracking ? 'LIVE' : 'WAITING'}
-                    </span>
-                  </div>
-                  <div className="alignment-list">
-                    {(hasTracking
-                      ? session.analysis.checks
-                      : [
-                          {
-                            label: 'Full body in frame',
-                            value: '',
-                            good: false,
-                          },
-                          {
-                            label:
-                              exercise.id === 'warrior'
-                                ? 'Arms at shoulder height'
-                                : exercise.id === 'tree'
-                                  ? 'Standing leg extended'
-                                  : 'Controlled movement',
-                            value: '',
-                            good: false,
-                          },
-                          {
-                            label: 'Steady, comfortable posture',
-                            value: '',
-                            good: false,
-                          },
-                        ]
-                    ).map((check) => (
-                      <div className="alignment-row" key={check.label}>
-                        <span
-                          className={`check-icon ${hasTracking ? (check.good ? 'good' : 'adjust') : ''}`}
-                        >
-                          {hasTracking ? (
-                            check.good ? (
-                              <Check size={11} />
-                            ) : (
-                              <span>–</span>
-                            )
-                          ) : (
-                            <span />
-                          )}
-                        </span>
-                        <span>{check.label}</span>
-                        <strong>{check.value || '—'}</strong>
+                  <MovementDemo
+                    key={exercise.id}
+                    exercise={exercise}
+                    language={language}
+                  />
+                  {reviewOnly ? (
+                    <TeacherReview
+                      key={`${selected}-${session.phase === 'idle'}`}
+                      language={language}
+                      active={session.phase === 'practice'}
+                      video={source === 'video' && !!tracker.media}
+                      time={
+                        source === 'video'
+                          ? tracker.time
+                          : session.stats.duration
+                      }
+                      attempts={session.attempts}
+                      notes={session.notes}
+                      onMark={session.markAttempt}
+                      onRemove={session.removeAttempt}
+                      onNotes={session.updateNotes}
+                      onSeek={tracker.seek}
+                    />
+                  ) : (
+                    <>
+                      <div
+                        className={`coaching-cue ${hasCoachingTracking ? 'tracking' : ''}`}
+                      >
+                        <div>
+                          <span className="cue-dot" />
+                          <strong>
+                            {session.paused
+                              ? tr('Paused')
+                              : session.phase === 'rest'
+                                ? tr('Target completed')
+                                : hasCoachingTracking
+                                  ? !session.coaching.needsAdjustment
+                                    ? t('Keep going', '繼續吧')
+                                    : t('Try this', '試試這樣做')
+                                  : tr('Awaiting tracking')}
+                          </strong>
+                        </div>
+                        <p>
+                          {session.paused
+                            ? tr('Resume to continue measurements.')
+                            : session.phase === 'rest'
+                              ? tr(
+                                  'Relax your arms, release the pose, and breathe.',
+                                )
+                              : tracker.media
+                                ? tr(session.coaching.cue)
+                                : tr(
+                                    'Enable the camera or load a video to see measurements.',
+                                  )}
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                  <div className="practice-metrics">
-                    <div>
-                      <span>
-                        {exercise.unit === 'reps'
-                          ? 'Completed reps'
-                          : 'Aligned hold'}
-                        <Tooltip
-                          title={
-                            exercise.unit === 'reps'
-                              ? 'A full controlled movement and return counts as one rep.'
-                              : 'Only time with all alignment checks passing counts.'
-                          }
-                        >
-                          <CircleHelp size={12} />
-                        </Tooltip>
-                      </span>
-                      <strong>
-                        {metricValue}
-                        <small>
-                          {' '}
-                          / {exercise.target}
-                          {exercise.unit === 'seconds' ? 's' : ''}
-                        </small>
-                      </strong>
-                      <Progress
-                        percent={Math.min(
-                          100,
-                          (metricValue / exercise.target) * 100,
+                      <div className="practice-metrics">
+                        <div>
+                          <span>
+                            {exercise.unit === 'reps'
+                              ? t('Movements completed', '已完成動作')
+                              : t('Hold time', '保持時間')}
+                            <Tooltip
+                              title={
+                                exercise.unit === 'reps'
+                                  ? t(
+                                      'A visible movement and return counts even when a technique adjustment is needed.',
+                                      '只要能追蹤完整動作及返回起點，即使姿勢需要調整也會計算次數。',
+                                    )
+                                  : tr(
+                                      'Only time with all alignment checks passing counts.',
+                                    )
+                              }
+                            >
+                              <CircleHelp size={12} />
+                            </Tooltip>
+                          </span>
+                          <strong>
+                            {metricValue}
+                            <small>
+                              {' '}
+                              / {exercise.target}
+                              {exercise.unit === 'seconds' ? 's' : ''}
+                            </small>
+                          </strong>
+                          <Progress
+                            percent={Math.min(
+                              100,
+                              (metricValue / exercise.target) * 100,
+                            )}
+                            showInfo={false}
+                            strokeColor="#5d9b77"
+                            railColor="#eaf0eb"
+                            size="small"
+                          />
+                        </div>
+                      </div>
+                      <details className="teacher-measurements">
+                        <summary>
+                          {t('Teacher measurements', '老師測量資料')}
+                        </summary>
+                        <p>
+                          {t(
+                            'Experimental checks. Not yet validated with Primary 1–3 recordings.',
+                            '實驗性檢查，尚未以小一至小三的影片驗證。',
+                          )}
+                        </p>
+                        <div className="alignment-heading">
+                          <span>{tr('Alignment check')}</span>
+                          <span
+                            className={`tracking-state ${hasTracking ? 'live' : ''}`}
+                          >
+                            {hasTracking ? tr('LIVE') : tr('WAITING')}
+                          </span>
+                        </div>
+                        <div className="alignment-list">
+                          {(hasTracking
+                            ? session.analysis.checks
+                            : [
+                                {
+                                  label: tr('Full body in frame'),
+                                  value: '',
+                                  good: false,
+                                },
+                                {
+                                  label: t(
+                                    'Follow the movement guide',
+                                    '跟著動作指南',
+                                  ),
+                                  value: '',
+                                  good: false,
+                                },
+                                {
+                                  label: tr('Steady, comfortable posture'),
+                                  value: '',
+                                  good: false,
+                                },
+                              ]
+                          ).map((check) => (
+                            <div
+                              className="alignment-row"
+                              key={tr(check.label)}
+                            >
+                              <span
+                                className={`check-icon ${hasTracking ? (check.good ? 'good' : 'adjust') : ''}`}
+                              >
+                                {hasTracking ? (
+                                  check.good ? (
+                                    <Check size={11} />
+                                  ) : (
+                                    <span>–</span>
+                                  )
+                                ) : (
+                                  <span />
+                                )}
+                              </span>
+                              <span>{tr(check.label)}</span>
+                              <strong>{tr(check.value || '—')}</strong>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <span>{tr('Alignment')}</span>
+                          <strong>
+                            {hasTracking ? session.analysis.score : '—'}
+                            <small>{hasTracking ? '%' : ''}</small>
+                          </strong>
+                          <span className="metric-caption">
+                            {hasTracking
+                              ? tr('Visible checks met')
+                              : tr('Awaiting movement')}
+                          </span>
+                        </div>
+                        {exercise.unit === 'reps' && (
+                          <p>
+                            {t(
+                              'Repetitions meeting all checks',
+                              '符合全部檢查的次數',
+                            )}
+                            : {session.stats.alignedReps}
+                          </p>
                         )}
-                        showInfo={false}
-                        strokeColor="#5d9b77"
-                        railColor="#eaf0eb"
-                        size="small"
-                      />
-                    </div>
-                    <div>
-                      <span>Alignment</span>
-                      <strong>
-                        {hasTracking ? session.analysis.score : '—'}
-                        <small>{hasTracking ? '%' : ''}</small>
-                      </strong>
-                      <span className="metric-caption">
-                        {hasTracking
-                          ? 'Visible checks met'
-                          : 'Awaiting movement'}
-                      </span>
-                    </div>
-                  </div>
+                      </details>
+                    </>
+                  )}
                   <div className="breathing-note">
                     <Leaf size={17} />
                     <p>{exercise.focus}</p>
                   </div>
                 </aside>
               </div>
-              {source === 'video' && tracker.media && (
-                <section className="review-panel">
+              {source === 'video' && tracker.media && !reviewOnly && (
+                <details className="review-panel">
+                  <summary>
+                    {t('Teacher video feedback', '老師影片回饋')}
+                  </summary>
                   <div className="section-heading">
                     <div>
-                      <h2>Video timeline</h2>
+                      <h2>{tr('Video timeline')}</h2>
                       <p>
-                        Play during a session to analyze. Select a moment to
-                        revisit it.
+                        {tr(
+                          'Play during a session to analyze. Select a moment to revisit it.',
+                        )}
                       </p>
                     </div>
                     <span className="timeline-key">
-                      <i /> Aligned <i className="adjust" /> Adjust{' '}
-                      <i className="untracked" /> Out of frame
+                      <i />
+                      {tr('Aligned')}
+                      <i className="adjust" />
+                      {tr('Adjust')} <i className="untracked" />
+                      {tr('Out of frame')}
                     </span>
                   </div>
                   {session.timeline.length ? (
@@ -918,7 +1256,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         {session.timeline.map((point) => (
                           <Tooltip
                             key={point.time}
-                            title={`${formatTime(point.time)} · ${point.visible ? point.score + '% checks met' : 'Body out of frame'}`}
+                            title={`${formatTime(point.time)} · ${point.visible ? point.score + tr('% checks met') : tr('Body out of frame')}`}
                           >
                             <button
                               aria-label={`Review ${formatTime(point.time)}`}
@@ -957,7 +1295,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                               onClick={() => tracker.seek(point.time)}
                             >
                               <span>{formatTime(point.time)}</span>
-                              {point.cue}
+                              {tr(point.cue)}
                               <ChevronRight size={14} />
                             </button>
                           ))}
@@ -966,21 +1304,29 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                   ) : (
                     <div className="empty-timeline">
                       <ListVideo size={21} />
-                      <span>Play during a session to analyze the video.</span>
+                      <span>
+                        {tr('Play during a session to analyze the video.')}
+                      </span>
                     </div>
                   )}
-                </section>
+                </details>
               )}
             </>
           )}
           {page === 'library' && (
             <>
-              <h2 className="view-title">Exercise library</h2>
+              <h2 className="view-title">{tr('Exercise library')}</h2>
               <div className="library-toolbar">
                 <Segmented
                   value={category}
                   onChange={setCategory}
-                  options={['All exercises', 'Yoga', 'Warm-up']}
+                  options={[
+                    'All exercises',
+                    ...new Set(availableExercises.map((e) => e.category)),
+                  ].map((value) => ({
+                    value,
+                    label: language === 'en' ? value : categoryZh[value],
+                  }))}
                 />
                 <span>
                   {
@@ -989,7 +1335,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         category === 'All exercises' || e.category === category,
                     ).length
                   }{' '}
-                  exercises
+                  {tr('exercises')}
                 </span>
               </div>
               <div className="library-grid">
@@ -1001,14 +1347,25 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                   .map((e) => (
                     <article className="library-card" key={e.id}>
                       <div className={`library-art ${e.color}`}>
-                        <Tag bordered={false}>{e.category}</Tag>
-                        <PoseArt pose={e.id} />
+                        <Tag bordered={false}>
+                          {language === 'en'
+                            ? e.category
+                            : categoryZh[e.category]}
+                        </Tag>
+                        <MovementDemo
+                          exercise={e}
+                          language={language}
+                          autoPlay
+                        />
                       </div>
                       <div className="library-copy">
                         <div className="inline">
                           <Clock3 size={14} />
                           {e.duration}
-                          <span className="middot">·</span>Beginner
+                          <span className="middot">·</span>
+                          {e.support === 'review'
+                            ? t('Teacher review', '老師檢視')
+                            : t('Automatic checks', '自動檢查')}
                         </div>
                         <h2>{e.name}</h2>
                         <p>{e.subtitle}</p>
@@ -1022,7 +1379,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           type="primary"
                           onClick={() => chooseExercise(e.id)}
                         >
-                          Practice {e.name}
+                          {t('Practice', '練習')} {e.name}
                           <ArrowRight size={15} />
                         </Button>
                       </div>
@@ -1031,33 +1388,49 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
               </div>
             </>
           )}
+          {page === 'routines' && (
+            <RoutineBuilder
+              language={language}
+              routines={routines}
+              onSave={(routine) =>
+                storeRoutines([
+                  ...routines.filter((r) => r.id !== routine.id),
+                  routine,
+                ])
+              }
+              onDelete={(id) =>
+                storeRoutines(routines.filter((r) => r.id !== id))
+              }
+              onStart={startRoutine}
+            />
+          )}
           {page === 'history' && (
             <>
-              <h2 className="view-title">Session history</h2>
+              <h2 className="view-title">{tr('Session history')}</h2>
               <div className="history-stats">
                 <div>
                   <span>
                     <Activity size={18} />
-                    Completed sessions
+                    {tr('Completed sessions')}
                   </span>
                   <strong>{history.length}</strong>
                 </div>
                 <div>
                   <span>
                     <Clock3 size={18} />
-                    Time in motion
+                    {tr('Time in motion')}
                   </span>
                   <strong>
                     {Math.floor(
                       history.reduce((sum, s) => sum + s.duration, 0) / 60,
                     )}
-                    <small> min</small>
+                    <small>{tr('min')}</small>
                   </strong>
                 </div>
                 <div>
                   <span>
                     <Target size={18} />
-                    Aligned hold time
+                    {tr('Aligned hold time')}
                   </span>
                   <strong>
                     {formatTime(
@@ -1072,25 +1445,26 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                 <div>
                   <span>
                     <TrendingUp size={18} />
-                    Completed repetitions
+                    {tr('Completed repetitions')}
                   </span>
                   <strong>{history.reduce((sum, s) => sum + s.reps, 0)}</strong>
                 </div>
               </div>
               <section className="history-panel">
                 <div className="section-heading">
-                  <h2>Recent sessions</h2>
+                  <h2>{tr('Recent sessions')}</h2>
                   {history.length > 0 && (
                     <Button
                       type="text"
                       danger
                       onClick={() =>
                         Modal.confirm({
-                          title: 'Clear practice history?',
+                          title: tr('Clear practice history?'),
                           getContainer: popupContainer,
-                          content:
+                          content: tr(
                             'This removes all saved session summaries from this device.',
-                          okText: 'Clear history',
+                          ),
+                          okText: tr('Clear history'),
                           okButtonProps: { danger: true },
                           onOk: () => {
                             try {
@@ -1103,7 +1477,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         })
                       }
                     >
-                      Clear history
+                      {tr('Clear history')}
                     </Button>
                   )}
                 </div>
@@ -1134,8 +1508,8 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                             )}{' '}
                             ·{' '}
                             {record.source === 'camera'
-                              ? 'Live camera'
-                              : 'Video review'}
+                              ? tr('Live camera')
+                              : tr('Video review')}
                           </span>
                         </div>
                         <span className="history-duration">
@@ -1143,9 +1517,11 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                           {formatTime(record.duration)}
                         </span>
                         <Tag color="green">
-                          {record.score === null
-                            ? 'No pose tracked'
-                            : `${record.score}% alignment`}
+                          {record.assessment === 'review'
+                            ? t('Teacher review', '老師檢視')
+                            : record.score === null
+                              ? tr('No pose tracked')
+                              : `${record.score}% ${tr('Alignment')}`}
                         </Tag>
                         <ChevronRight size={17} />
                       </button>
@@ -1160,15 +1536,18 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                     }
                     description={
                       <>
-                        <h3>No sessions yet</h3>
+                        <h3>{tr('No sessions yet')}</h3>
                         <p>
-                          Complete your first session to see your progress here.
+                          {tr(
+                            'Complete your first session to see your progress here.',
+                          )}
                         </p>
                       </>
                     }
                   >
                     <Button type="primary" onClick={() => navigate('studio')}>
-                      Start practice <ArrowRight size={15} />
+                      {tr('Start practice')}
+                      <ArrowRight size={15} />
                     </Button>
                   </Empty>
                 )}
@@ -1178,7 +1557,9 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
           {storageWarning && (
             <Alert
               type="warning"
-              title="Browser storage is unavailable. Your session is visible now, but may not be saved after this page closes."
+              title={tr(
+                'Browser storage is unavailable. Your session is visible now, but may not be saved after this page closes.',
+              )}
               closable
             />
           )}
@@ -1187,7 +1568,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
           type="file"
           accept="video/*"
           ref={uploadRef}
-          aria-label="Choose exercise video"
+          aria-label={tr('Choose exercise video')}
           className="visually-hidden"
           onChange={(e) => {
             uploadFile(e.target.files?.[0]);
@@ -1196,12 +1577,12 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
         />
         <Modal
           getContainer={popupContainer}
-          title={`${exercise.name} · pose guide`}
+          title={`${exercise.name} · ${tr('Pose guide')}`}
           open={instructions}
           onCancel={() => setInstructions(false)}
           footer={
             <Button type="primary" onClick={() => setInstructions(false)}>
-              Done
+              {tr('Done')}
             </Button>
           }
         >
@@ -1217,27 +1598,29 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
         </Modal>
         <Drawer
           getContainer={popupContainer}
-          title="Preferences"
+          title={tr('Preferences')}
           open={settings}
           onClose={() => setSettings(false)}
           width={390}
         >
           <div className="setting-row">
             <div>
-              <strong>Skeleton overlay</strong>
-              <p>See the joints and connections we track.</p>
+              <strong>{tr('Skeleton overlay')}</strong>
+              <p>{tr('See the joints and connections we track.')}</p>
             </div>
             <Switch checked={overlay} onChange={setOverlay} />
           </div>
           <div className="setting-row">
             <div>
-              <strong>Smooth skeleton movement</strong>
+              <strong>{tr('Smooth skeleton movement')}</strong>
               <p>
-                Tween keypoints between tracked frames for a softer overlay.
+                {tr(
+                  'Tween keypoints between tracked frames for a softer overlay.',
+                )}
               </p>
             </div>
             <Switch
-              aria-label="Smooth skeleton movement"
+              aria-label={tr('Smooth skeleton movement')}
               checked={tweening}
               disabled={!overlay}
               onChange={setTweening}
@@ -1245,21 +1628,21 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
           </div>
           <div className="setting-row">
             <div>
-              <strong>Mirror camera</strong>
-              <p>Move as you would in a mirror.</p>
+              <strong>{tr('Mirror camera')}</strong>
+              <p>{tr('Move as you would in a mirror.')}</p>
             </div>
             <Switch checked={mirror} onChange={setMirror} />
           </div>
           <div className="setting-row">
             <div>
-              <strong>Spoken guidance</strong>
-              <p>Hear alignment cues while you move.</p>
+              <strong>{tr('Spoken guidance')}</strong>
+              <p>{tr('Hear alignment cues while you move.')}</p>
             </div>
             <Switch checked={sound} onChange={setSound} />
           </div>
           <div className="setting-block">
-            <strong>Alignment flexibility</strong>
-            <p>Allow a little more room in the joint-angle targets.</p>
+            <strong>{tr('Alignment flexibility')}</strong>
+            <p>{tr('Allow a little more room in the joint-angle targets.')}</p>
             <Select
               value={tolerance}
               onChange={(value) => {
@@ -1267,31 +1650,31 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                 session.onSeek();
               }}
               options={[
-                { value: 0, label: 'Standard · base angle ranges' },
-                { value: 5, label: 'Gentle · 5° extra flexibility' },
-                { value: 10, label: 'Relaxed · 10° extra flexibility' },
+                { value: 0, label: tr('Standard · base angle ranges') },
+                { value: 5, label: tr('Gentle · 5° extra flexibility') },
+                { value: 10, label: tr('Relaxed · 10° extra flexibility') },
               ]}
               style={{ width: '100%' }}
             />
           </div>
           <div className="privacy-note">
             <ShieldCheck size={22} />
-            <h3>Local processing</h3>
+            <h3>{tr('Local processing')}</h3>
             <p>
-              Frames are processed in your browser. Forma does not upload or
-              record your camera feed. Only session summaries are stored
-              locally.
+              {tr(
+                'Frames are processed in your browser. Forma does not upload or record your camera feed. Only session summaries are stored locally.',
+              )}
             </p>
           </div>
         </Drawer>
         <Modal
           getContainer={popupContainer}
-          title="Setup guide"
+          title={tr('Setup guide')}
           open={help}
           onCancel={() => setHelp(false)}
           footer={
             <Button type="primary" onClick={() => setHelp(false)}>
-              Done
+              {tr('Done')}
             </Button>
           }
           width={600}
@@ -1300,42 +1683,42 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
             <div className="help-step">
               <span>01</span>
               <div>
-                <h3>Camera placement</h3>
+                <h3>{tr('Camera placement')}</h3>
                 <p>
-                  Use a well-lit space. Place your camera around hip height and
-                  step back until your head, hands, and feet fit in the frame.
-                  Face the camera.
+                  {tr(
+                    'Use a well-lit space. Place your camera around hip height and step back until your head, hands, and feet fit in the frame. Face the camera.',
+                  )}
                 </p>
               </div>
             </div>
             <div className="help-step">
               <span>02</span>
               <div>
-                <h3>Practice modes</h3>
+                <h3>{tr('Practice modes')}</h3>
                 <p>
-                  Guided practice includes a framing countdown, an aligned hold
-                  or rep target, and a short rest. Open analysis lets you
-                  explore without a target or time limit.
+                  {tr(
+                    'Guided practice includes a framing countdown, an aligned hold or rep target, and a short rest. Open analysis lets you explore without a target or time limit.',
+                  )}
                 </p>
               </div>
             </div>
             <div className="help-step">
               <span>03</span>
               <div>
-                <h3>Alignment feedback</h3>
+                <h3>{tr('Alignment feedback')}</h3>
                 <p>
-                  Follow one cue at a time. Holds count when every check passes;
-                  warm-ups count a controlled movement and return. Use the video
-                  timeline to revisit feedback.
+                  {tr(
+                    'A visible movement and return counts even when an adjustment is needed. Holds count when all shape checks pass. Open Teacher measurements for the separate technique results.',
+                  )}
                 </p>
               </div>
             </div>
             <div className="help-limit">
               <Focus size={18} />
               <p>
-                Feedback describes visible alignment from one camera. It isn’t a
-                medical assessment. Move within a comfortable range and stop if
-                something hurts.
+                {tr(
+                  'Feedback describes visible alignment from one camera. It isn’t a medical assessment. Move within a comfortable range and stop if something hurts.',
+                )}
               </p>
             </div>
           </div>
@@ -1348,30 +1731,34 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
           width={510}
         >
           <div className="recap-content">
-            <h2>Session summary</h2>
+            <h2>{tr('Session summary')}</h2>
             <p>
               {session.recap && getExercise(session.recap.exercise).name} ·{' '}
               {session.recap?.source === 'camera'
-                ? 'Live practice'
-                : 'Video review'}
+                ? tr('Live practice')
+                : tr('Video review')}
             </p>
             {session.recap && (
               <>
                 <div className="recap-metrics">
                   <div>
                     <strong>{formatTime(session.recap.duration)}</strong>
-                    <span>Time in motion</span>
+                    <span>{tr('Time in motion')}</span>
                   </div>
                   <div>
                     <strong>
-                      {getExercise(session.recap.exercise).unit === 'seconds'
-                        ? `${Math.floor(session.recap.hold)}s`
-                        : session.recap.reps}
+                      {session.recap.assessment === 'review'
+                        ? (session.recap.attempts?.length ?? 0)
+                        : getExercise(session.recap.exercise).unit === 'seconds'
+                          ? `${Math.floor(session.recap.hold)}s`
+                          : session.recap.reps}
                     </strong>
                     <span>
-                      {getExercise(session.recap.exercise).unit === 'seconds'
-                        ? 'Aligned hold'
-                        : 'Completed reps'}
+                      {session.recap.assessment === 'review'
+                        ? t('Teacher-marked attempts', '老師標記次數')
+                        : getExercise(session.recap.exercise).unit === 'seconds'
+                          ? tr('Aligned hold')
+                          : tr('Completed reps')}
                     </span>
                   </div>
                   <div>
@@ -1380,37 +1767,76 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                         ? '—'
                         : `${session.recap.score}%`}
                     </strong>
-                    <span>Avg. alignment</span>
+                    <span>{tr('Avg. alignment')}</span>
                   </div>
                 </div>
                 {session.recap.cues.length > 0 ? (
                   <div className="recap-cues">
-                    <h3>Recorded cues</h3>
+                    <h3>{tr('Recorded cues')}</h3>
                     {session.recap.cues.map((cue) => (
-                      <p key={cue}>
+                      <p key={tr(cue)}>
                         <Leaf size={14} />
-                        {cue}
+                        {tr(cue)}
                       </p>
                     ))}
                   </div>
                 ) : (
                   <p className="recap-note">
-                    {session.recap.score === null
-                      ? 'No reliable pose was tracked. Try a brighter space with your whole body in view.'
-                      : 'No adjustment cues recorded.'}
+                    {session.recap.assessment === 'review'
+                      ? t(
+                          'Teacher review — no automatic technique score.',
+                          '老師檢視 — 不提供自動技術評分。',
+                        )
+                      : session.recap.score === null
+                        ? tr(
+                            'No reliable pose was tracked. Try a brighter space with your whole body in view.',
+                          )
+                        : tr('No adjustment cues recorded.')}
                   </p>
                 )}
+                {session.recap.alignedReps !== undefined &&
+                  getExercise(session.recap.exercise).unit === 'reps' && (
+                    <p>
+                      {t(
+                        'Repetitions meeting all checks',
+                        '符合全部檢查的次數',
+                      )}
+                      : {session.recap.alignedReps}
+                    </p>
+                  )}
+                {session.recap.routine && (
+                  <p>
+                    {session.recap.routine.name} · {t('Step', '步驟')}{' '}
+                    {session.recap.routine.step} / {session.recap.routine.total}
+                  </p>
+                )}
+                {session.recap.notes && <p>{session.recap.notes}</p>}
+                {session.recap.attempts?.map((attempt, i) => (
+                  <p key={i}>
+                    {reviewTime(attempt.time)} ·{' '}
+                    {attempt.note || t('Attempt', '動作')}
+                  </p>
+                ))}
                 <Button
                   block
                   type="primary"
                   onClick={() => {
+                    if (recapIsCurrentStep) {
+                      nextRoutineStep();
+                      return;
+                    }
                     session.setRecap(null);
                     chooseExercise(
                       exercises[(selectedIndex + 1) % exercises.length].id,
                     );
                   }}
                 >
-                  Next exercise <ArrowRight size={16} />
+                  {recapIsCurrentStep && run
+                    ? run.index + 1 === run.routine.steps.length
+                      ? t('Finish combination', '完成組合')
+                      : t('Next step', '下一步')
+                    : t('Next exercise', '下一個動作')}{' '}
+                  <ArrowRight size={16} />
                 </Button>
                 <Button
                   block
@@ -1418,7 +1844,7 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                   icon={<ArrowDownToLine size={15} />}
                   onClick={() => session.recap && exportRecap(session.recap)}
                 >
-                  Download session summary
+                  {tr('Download session summary')}
                 </Button>
               </>
             )}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "headstand",
+  "category": "Inverted skills",
+  "publication": "draft",
+  "contentReview": "pending",
+  "intendedAudience": [],
+  "source": {
+    "kind": "ai-generated-reference",
+    "reference": "docs/gym movements.jpeg",
+    "status": "provisional"
+  },
+  "requirements": {
+    "equipment": [],
+    "position": "inverted",
+    "jumping": false,
+    "camera": "side"
+  },
+  "defaults": {
+    "target": 0,
+    "unit": "seconds"
+  },
+  "analysisProfileId": null,
+  "presentation": {
+    "color": "lavender",
+    "illustration": null
+  },
+  "locales": {
+    "en": {
+      "name": "Headstand (advanced)",
+      "subtitle": "Teacher review",
+      "steps": [
+        "Review an advanced headstand only with your teacher. The overlay cannot assess head or neck loading.",
+        "Place the camera to your side and keep your whole movement in view."
+      ],
+      "focus": "Review with your teacher. No automatic technique score is assigned."
+    },
+    "zh-Hant": {
+      "name": "頭倒立（進階）",
+      "subtitle": "老師檢視",
+      "steps": [
+        "僅與老師一同檢視進階頭倒立。骨架顯示無法評估頭部或頸部的承重。",
+        "將鏡頭放在身體側面，讓整個動作保持在畫面內。"
+      ],
+      "focus": "與老師一同檢視，不提供自動技術評分。"
+    }
+  }
+}

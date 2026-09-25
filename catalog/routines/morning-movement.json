@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "morning-movement",
+  "collectionId": "primary-1-3",
+  "locales": {
+    "en": {
+      "name": "Morning movement"
+    },
+    "zh-Hant": {
+      "name": "晨間動作組合"
+    }
+  },
+  "steps": [
+    {
+      "exercise": "march-in-place",
+      "target": 0
+    },
+    {
+      "exercise": "high-knees",
+      "target": 0
+    },
+    {
+      "exercise": "shoulder-circles",
+      "target": 0
+    },
+    {
+      "exercise": "clasped-overhead-stretch",
+      "target": 0
+    },
+    {
+      "exercise": "clasped-forward-stretch",
+      "target": 0
+    },
+    {
+      "exercise": "standing-cat-cow",
+      "target": 0
+    },
+    {
+      "exercise": "hand-on-hip-side-stretch",
+      "target": 0
+    },
+    {
+      "exercise": "standing-twists",
+      "target": 0
+    }
+  ]
+}
