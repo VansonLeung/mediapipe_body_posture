@@ -1,22 +1,30 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import App from './App';
+const KioskStudio = lazy(() => import('./kiosk/KioskStudio'));
+const currentWorkspace = () =>
+  location.hash === '#kiosk'
+    ? 'kiosk'
+    : location.hash === '#posture'
+      ? 'posture'
+      : 'studio';
 const PostureMonitor = lazy(() => import('./components/PostureMonitor'));
 
 export default function Workspaces() {
-  const [workspace, setWorkspace] = useState(() =>
-    location.hash === '#posture' ? 'posture' : 'studio',
-  );
+  const [workspace, setWorkspace] = useState(currentWorkspace);
   useEffect(() => {
-    const update = () =>
-      setWorkspace(location.hash === '#posture' ? 'posture' : 'studio');
+    const update = () => setWorkspace(currentWorkspace());
     window.addEventListener('hashchange', update);
     return () => window.removeEventListener('hashchange', update);
   }, []);
-  const navigate = (next: 'studio' | 'posture') => {
+  const navigate = (next: 'studio' | 'posture' | 'kiosk') => {
     location.hash = next;
     setWorkspace(next);
   };
-  return workspace === 'posture' ? (
+  return workspace === 'kiosk' ? (
+    <Suspense fallback={<div role="status">Loading kiosk…</div>}>
+      <KioskStudio onExit={() => navigate('studio')} />
+    </Suspense>
+  ) : workspace === 'posture' ? (
     <Suspense
       fallback={
         <div
@@ -34,6 +42,9 @@ export default function Workspaces() {
       <PostureMonitor onOpenStudio={() => navigate('studio')} />
     </Suspense>
   ) : (
-    <App onOpenPosture={() => navigate('posture')} />
+    <App
+      onOpenPosture={() => navigate('posture')}
+      onOpenKiosk={() => navigate('kiosk')}
+    />
   );
 }

@@ -1,3 +1,4 @@
+import { readHistory } from './lib/sessionHistory';
 import { useEffect, useRef, useState } from 'react';
 import zhHK from 'antd/locale/zh_HK';
 import enUS from 'antd/locale/en_US';
@@ -48,7 +49,6 @@ import {
   Monitor,
 } from 'lucide-react';
 import {
-  exercises as allExercises,
   availableExercises,
   activeCollection,
   isAvailableExercise,
@@ -78,57 +78,13 @@ import { popupContainer, useAppFullscreen } from './hooks/useAppFullscreen';
 import { useDropdownLayer } from './hooks/useDropdownLayer';
 
 type Page = 'studio' | 'library' | 'history' | 'routines';
-function readHistory(): SessionRecord[] {
-  try {
-    const data: unknown = JSON.parse(
-      localStorage.getItem('forma-sessions') ?? '[]',
-    );
-    return Array.isArray(data)
-      ? data
-          .filter(
-            (v): v is SessionRecord =>
-              v &&
-              typeof v.id === 'string' &&
-              typeof v.date === 'string' &&
-              allExercises.some((e) => e.id === v.exercise) &&
-              Number.isFinite(v.duration) &&
-              Number.isFinite(v.hold) &&
-              Number.isFinite(v.reps) &&
-              (v.score === null || Number.isFinite(v.score)) &&
-              Array.isArray(v.cues) &&
-              v.cues.every((c: unknown) => typeof c === 'string') &&
-              (v.assessment === undefined ||
-                ['automatic', 'review'].includes(v.assessment)) &&
-              (v.notes === undefined || typeof v.notes === 'string') &&
-              (v.alignedReps === undefined ||
-                (Number.isInteger(v.alignedReps) && v.alignedReps >= 0)) &&
-              (v.attempts === undefined ||
-                (Array.isArray(v.attempts) &&
-                  v.attempts.every(
-                    (a: { time?: unknown; note?: unknown } | null) =>
-                      a &&
-                      typeof a.time === 'number' &&
-                      Number.isFinite(a.time) &&
-                      a.time >= 0 &&
-                      typeof a.note === 'string',
-                  ))) &&
-              (v.routine === undefined ||
-                (v.routine &&
-                  typeof v.routine.id === 'string' &&
-                  typeof v.routine.name === 'string' &&
-                  Number.isInteger(v.routine.step) &&
-                  Number.isInteger(v.routine.total) &&
-                  v.routine.step >= 1 &&
-                  v.routine.step <= v.routine.total)) &&
-              ['camera', 'video'].includes(v.source),
-          )
-          .slice(0, 100)
-      : [];
-  } catch {
-    return [];
-  }
-}
-export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
+export default function App({
+  onOpenPosture,
+  onOpenKiosk,
+}: {
+  onOpenPosture: () => void;
+  onOpenKiosk?: () => void;
+}) {
   const [language, setLanguage] = useState<StudioLanguage>(() => {
     try {
       return localStorage.getItem('forma-studio-language') === 'zh-Hant'
@@ -457,6 +413,18 @@ export default function App({ onOpenPosture }: { onOpenPosture: () => void }) {
                 { value: 'zh-Hant', label: '繁中' },
               ]}
             />
+            {onOpenKiosk && (
+              <button
+                className="text-button workspace-link"
+                onClick={() => {
+                  if (active) session.finish();
+                  tracker.stop();
+                  onOpenKiosk();
+                }}
+              >
+                {t('Kiosk', '互動站')}
+              </button>
+            )}
             <button
               className="text-button workspace-link"
               aria-label={tr('Posture Monitor')}

@@ -7,10 +7,14 @@ export function MovementDemo({
   exercise,
   language,
   autoPlay = false,
+  gestureControls = false,
+  showControls = true,
 }: {
   exercise: Exercise;
   language: StudioLanguage;
   autoPlay?: boolean;
+  gestureControls?: boolean;
+  showControls?: boolean;
 }) {
   const [{ frame, elapsed }, setPosition] = useState({ frame: 0, elapsed: 0 }),
     [playing, setPlaying] = useState(autoPlay);
@@ -58,14 +62,19 @@ export function MovementDemo({
         <p>
           {exercise.steps[Math.min(instruction, exercise.steps.length - 1)]}
         </p>
-        {frames > 1 && (
+        {frames > 1 && showControls && (
           <div className="demo-controls">
-            <Button size="small" onClick={() => setPlaying((p) => !p)}>
+            <Button
+              data-kiosk-action={gestureControls ? 'demo-play' : undefined}
+              size="small"
+              onClick={() => setPlaying((p) => !p)}
+            >
               {playing
                 ? t('Pause demonstration', '暫停示範')
                 : t('Play demonstration', '播放示範')}
             </Button>
             <Button
+              data-kiosk-action={gestureControls ? 'demo-next' : undefined}
               size="small"
               onClick={() => {
                 setPlaying(false);

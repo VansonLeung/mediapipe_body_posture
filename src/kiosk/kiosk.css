@@ -1,0 +1,725 @@
+.kiosk-shell {
+  height: 100dvh;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  background: #f3f6eb;
+  color: #173e35;
+  overflow: auto;
+  --kiosk-text: clamp(20px, 1.8vw, 32px);
+  font-size: var(--kiosk-text);
+  line-height: 1.4;
+}
+.kiosk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 2px solid #cad8cd;
+}
+.kiosk-header h1 {
+  font-size: clamp(24px, 2.5vw, 42px);
+  white-space: nowrap;
+}
+.kiosk-teacher-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.kiosk-teacher-controls button {
+  background: #fff;
+  border: 2px solid #bacfc4;
+  border-radius: 12px;
+  min-height: 48px;
+  padding: 8px 14px;
+  font-size: clamp(16px, 1.3vw, 24px);
+}
+.kiosk-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding: 24px;
+}
+.kiosk-camera {
+  min-height: 180px;
+  min-width: 0;
+  position: relative;
+  background: #14382f;
+  border-radius: 28px;
+  overflow: hidden;
+}
+.kiosk-video,
+.kiosk-skeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: calc(100% - 72px);
+  object-fit: contain;
+  transform: scaleX(-1);
+}
+.kiosk-skeleton {
+  pointer-events: none;
+}
+.kiosk-camera-message {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px;
+  text-align: center;
+  background: #14382ff2;
+  color: #fff;
+}
+.kiosk-camera-message strong {
+  font-size: 1.6em;
+}
+.kiosk-camera-caption {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  border-radius: 12px;
+  background: #14382fe6;
+  color: #fff;
+  padding: 12px;
+  text-align: center;
+  font-size: clamp(18px, 1.8vw, 28px);
+}
+.kiosk-panel {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(8px, 1.5vh, 24px);
+  text-align: center;
+}
+.kiosk-panel h2 {
+  font-size: clamp(28px, 3vw, 54px);
+  line-height: 1.15;
+}
+.kiosk-eyebrow {
+  font-weight: 650;
+}
+.kiosk-choice {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 3px solid #b8d0bf;
+  border-radius: 28px;
+  background: #fff;
+  padding: 18px;
+}
+.kiosk-choice > svg {
+  width: min(70%, 300px);
+  height: min(22vh, 240px);
+}
+.kiosk-choice > strong {
+  padding-top: 8px;
+  color: #125541;
+}
+.kiosk-actions {
+  display: flex;
+  gap: 16px;
+}
+.kiosk-actions > button {
+  flex: 1;
+}
+.kiosk-button {
+  min-height: 80px;
+  padding: 16px 24px;
+  font-size: clamp(22px, 2.2vw, 36px);
+  line-height: 1.2;
+  font-weight: 700;
+  border: 3px solid #7d9d8d;
+  border-radius: 20px;
+  background: #fff;
+  color: #173e35;
+}
+.kiosk-button.primary {
+  background: #176148;
+  color: #fff;
+  border-color: #176148;
+}
+.kiosk-button:disabled {
+  opacity: 0.5;
+}
+.kiosk-shell button:focus-visible,
+.kiosk-shell .targeted {
+  outline: 6px solid #dc8b13;
+  outline-offset: 3px;
+}
+.kiosk-help {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 24px 18px;
+  text-align: center;
+}
+.kiosk-help > span {
+  font-size: 0.8em;
+}
+.kiosk-panel .movement-demo {
+  margin: 0;
+  padding: 12px;
+  min-height: 0;
+  text-align: left;
+  border: 2px solid #d4dfd0;
+  border-radius: 20px;
+}
+.kiosk-panel .movement-demo > svg {
+  width: clamp(90px, 10vw, 170px);
+  height: clamp(100px, 12vh, 200px);
+}
+.kiosk-panel .movement-demo > div {
+  min-width: 0;
+}
+.kiosk-panel .movement-demo p {
+  font-size: clamp(18px, 1.6vw, 28px);
+}
+.kiosk-panel .demo-controls .ant-btn {
+  height: auto;
+  min-height: 48px;
+  font-size: clamp(16px, 1.2vw, 22px);
+  padding: 8px 12px;
+  white-space: normal;
+}
+.kiosk-score {
+  display: flex;
+  flex-direction: column;
+}
+.kiosk-score strong {
+  font-size: clamp(70px, 7vw, 140px);
+  line-height: 1;
+  animation: kiosk-pop 0.4s ease-out;
+}
+.kiosk-score small {
+  font-size: 0.4em;
+}
+.kiosk-stars {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #b4bfae;
+  font-size: clamp(25px, 3vw, 48px);
+}
+.kiosk-stars .earned {
+  color: #a86500;
+  text-shadow: 0 2px 0 #ffde73;
+}
+.kiosk-coaching {
+  font-size: clamp(18px, 1.7vw, 28px);
+}
+.kiosk-result {
+  font-size: clamp(32px, 3vw, 64px);
+}
+.kiosk-celebration {
+  font-size: clamp(48px, 8vw, 120px);
+  color: #a86500;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+.kiosk-celebration span {
+  animation: kiosk-pop 0.6s ease-out both;
+}
+.kiosk-celebration span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.kiosk-celebration span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.kiosk-countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  background: #14382f80;
+}
+.kiosk-countdown strong {
+  font-size: clamp(100px, 15vw, 240px);
+}
+.kiosk-pause-progress {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+}
+.kiosk-pause-progress progress {
+  display: block;
+  width: 100%;
+  accent-color: #176148;
+}
+.kiosk-cursor {
+  position: fixed;
+  z-index: 2000;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px #0008);
+}
+.kiosk-cursor svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.kiosk-cursor circle {
+  fill: #173e3580;
+  stroke-width: 6;
+}
+.kiosk-cursor .cursor-track {
+  stroke: #fff;
+}
+.kiosk-cursor .cursor-fill {
+  stroke: #ffcf46;
+  fill: none;
+}
+.kiosk-cursor > span {
+  position: absolute;
+  inset: 29px;
+  border-radius: 50%;
+  background: #fff;
+}
+@keyframes kiosk-pop {
+  from {
+    transform: scale(0.85);
+  }
+  55% {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@media (max-aspect-ratio: 1/1) {
+  .kiosk-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(170px, 0.8fr) minmax(340px, 1.2fr);
+  }
+  .kiosk-header {
+    flex-wrap: wrap;
+  }
+  .kiosk-panel {
+    gap: 12px;
+  }
+  .kiosk-choice {
+    display: grid;
+    grid-template-columns: minmax(80px, 0.7fr) 1fr;
+    gap: 8px;
+  }
+  .kiosk-choice > svg {
+    grid-row: span 3;
+    width: 100%;
+    height: 150px;
+  }
+  .kiosk-panel .movement-demo > svg {
+    width: 110px;
+    height: 130px;
+  }
+  .kiosk-score strong {
+    font-size: clamp(70px, 10vw, 140px);
+  }
+}
+@media (max-width: 600px) {
+  .kiosk-shell {
+    min-height: 844px;
+  }
+  .kiosk-header {
+    padding: 12px;
+    gap: 8px;
+  }
+  .kiosk-teacher-controls {
+    gap: 6px;
+  }
+  .kiosk-teacher-controls button {
+    font-size: 14px;
+    padding: 6px 8px;
+    min-height: 44px;
+  }
+  .kiosk-layout {
+    padding: 12px;
+    gap: 12px;
+    grid-template-rows: minmax(170px, 0.6fr) minmax(360px, 1.4fr);
+  }
+  .kiosk-button {
+    min-height: 64px;
+    padding: 12px;
+    font-size: 22px;
+  }
+  .kiosk-actions {
+    gap: 10px;
+  }
+  .kiosk-help {
+    padding: 8px 12px 16px;
+    font-size: 18px;
+  }
+  .kiosk-camera-message {
+    gap: 10px;
+    padding: 12px;
+    font-size: 18px;
+  }
+  .kiosk-camera-message strong {
+    font-size: 24px;
+  }
+  .kiosk-panel .movement-demo {
+    padding: 6px;
+    gap: 6px;
+  }
+  .kiosk-panel .movement-demo > svg {
+    width: 80px;
+    height: 100px;
+  }
+  .kiosk-panel .movement-demo strong {
+    font-size: 18px;
+  }
+  .kiosk-panel .movement-demo p {
+    font-size: 18px;
+  }
+  .kiosk-panel .demo-controls .ant-btn {
+    font-size: 14px;
+    padding: 6px;
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kiosk-score strong,
+  .kiosk-celebration span {
+    animation: none;
+  }
+}
+
+/* Practice has a single pause action; it also stops the demonstration. */
+.kiosk-shell[data-view='practice'] .movement-demo strong {
+  display: none;
+}
+@media (max-width: 600px) {
+  .kiosk-shell[data-view='practice'] .kiosk-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto auto auto;
+    align-content: center;
+    align-items: center;
+  }
+  .kiosk-shell[data-view='practice'] .kiosk-panel > h2 {
+    grid-column: 1 / -1;
+  }
+  .kiosk-shell[data-view='practice'] .kiosk-score {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .kiosk-shell[data-view='practice'] .kiosk-score > span {
+    font-size: 18px;
+  }
+  .kiosk-shell[data-view='practice'] .kiosk-stars {
+    grid-column: 1;
+    grid-row: 3;
+    font-size: 24px;
+  }
+  .kiosk-shell[data-view='practice'] .movement-demo {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    justify-content: center;
+    border: 0;
+  }
+  .kiosk-shell[data-view='practice'] .movement-demo > svg {
+    width: 140px;
+    height: 150px;
+  }
+  .kiosk-shell[data-view='practice'] .movement-demo > div {
+    display: none;
+  }
+  .kiosk-shell[data-view='practice'] .kiosk-coaching,
+  .kiosk-shell[data-view='practice'] .kiosk-panel > .kiosk-button {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Full-page camera mode: one shared coordinate plane for video and skeleton.
+   Object-fit contain preserves the full captured body in either orientation. */
+.kiosk-shell[data-layout='camera'] {
+  position: relative;
+  isolation: isolate;
+  min-height: 600px;
+  background: #14382f;
+  color: #fff;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.kiosk-shell[data-layout='camera'] .kiosk-layout {
+  display: contents;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-camera {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  border-radius: 0;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-video,
+.kiosk-shell[data-layout='camera'] .kiosk-skeleton {
+  height: 100%;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-header {
+  position: relative;
+  z-index: 5;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  background: #102e27ed;
+  border: 0;
+  gap: 8px;
+  padding: 12px 20px;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-header h1 {
+  font-size: clamp(24px, 2.5vw, 36px);
+}
+.kiosk-shell[data-layout='camera'] .kiosk-teacher-controls {
+  gap: 6px;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-teacher-controls button {
+  color: #173e35;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-panel {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(540px, calc(100% - 40px));
+  max-height: calc(100% - 270px);
+  gap: 12px;
+  padding: 20px;
+  border: 2px solid #d2dfd1;
+  border-radius: 24px;
+  background: #f4f8f0f5;
+  color: #173e35;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-panel h2 {
+  font-size: clamp(26px, 3vw, 42px);
+}
+.kiosk-shell[data-layout='camera'] .kiosk-choice {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px;
+  padding: 12px;
+  flex: initial;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-choice > svg {
+  grid-row: span 3;
+  width: 120px;
+  height: 130px;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-choice > strong {
+  font-size: 20px;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-button {
+  min-height: 64px;
+  padding: 12px;
+  font-size: clamp(22px, 2vw, 28px);
+}
+.kiosk-shell[data-layout='camera'] .kiosk-help {
+  position: absolute;
+  z-index: 3;
+  inset: auto 0 0;
+  padding: 12px 20px calc(16px + env(safe-area-inset-bottom));
+  background: #102e27ed;
+  font-size: clamp(18px, 1.6vw, 24px);
+}
+.kiosk-shell[data-layout='camera'] .kiosk-camera-caption {
+  bottom: calc(112px + env(safe-area-inset-bottom));
+  left: 16px;
+  right: auto;
+  max-width: 190px;
+  font-size: 16px;
+  padding: 8px;
+  z-index: 1;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-camera-message {
+  z-index: 4;
+  padding: 160px 24px 100px;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-camera-message > p {
+  max-width: 600px;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-camera-message a {
+  display: block;
+  margin-top: 16px;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-countdown {
+  z-index: 1;
+}
+.kiosk-shell[data-layout='camera'] .kiosk-pause-progress {
+  top: 180px;
+  left: 30%;
+  right: 30%;
+  z-index: 3;
+  color: #173e35;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-panel {
+  inset: calc(144px + env(safe-area-inset-top)) 20px
+    calc(112px + env(safe-area-inset-bottom));
+  transform: none;
+  width: auto;
+  max-height: none;
+  padding: 0;
+  background: none;
+  border: 0;
+  display: block;
+  pointer-events: none;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-panel > h2 {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 380px);
+  color: #fff;
+  background: #102e27ed;
+  font-size: clamp(22px, 2.4vw, 36px);
+  padding: 8px 12px;
+  border-radius: 14px;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-score {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 160px;
+  padding: 16px 10px;
+  background: #f4f8f0f5;
+  border-radius: 20px;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-score strong {
+  font-size: 76px;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-score > span {
+  font-size: 18px;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-stars {
+  position: absolute;
+  top: 165px;
+  left: 0;
+  width: 160px;
+  font-size: 28px;
+  background: #f4f8f0f5;
+  padding: 8px;
+  border-radius: 16px;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .movement-demo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 180px;
+  margin: 0;
+  padding: 10px;
+  flex-direction: column;
+  background: #f4f8f0f5;
+  text-align: center;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .movement-demo > svg {
+  width: 145px;
+  height: 150px;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .movement-demo > div {
+  display: none;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-coaching {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  max-width: min(560px, 100%);
+  margin: 0;
+  background: #102e27ed;
+  color: #fff;
+  padding: 12px;
+  border-radius: 14px;
+  text-align: left;
+}
+.kiosk-shell[data-layout='camera'][data-view='practice']
+  .kiosk-panel
+  > .kiosk-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 180px;
+  pointer-events: auto;
+}
+@media (max-width: 600px) {
+  .kiosk-shell[data-layout='camera'] .kiosk-header {
+    padding: 8px 12px;
+  }
+  .kiosk-shell[data-layout='camera'] .kiosk-panel {
+    padding: 12px;
+    bottom: 130px;
+    width: calc(100% - 24px);
+    max-height: calc(100% - 290px);
+  }
+  .kiosk-shell[data-layout='camera'] .kiosk-help {
+    font-size: 16px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-panel {
+    top: 160px;
+    left: 12px;
+    right: 12px;
+    bottom: 130px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-panel > h2 {
+    top: -20px;
+    max-width: 100%;
+    font-size: 24px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-score {
+    top: 48px;
+    width: 110px;
+    padding: 10px 6px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-score strong {
+    font-size: 56px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-score > span {
+    font-size: 16px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-stars {
+    top: 186px;
+    width: 110px;
+    font-size: 22px;
+    gap: 3px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice'] .movement-demo {
+    top: 48px;
+    width: 104px;
+    padding: 6px;
+  }
+  .kiosk-shell[data-layout='camera'][data-view='practice']
+    .movement-demo
+    > svg {
+    width: 90px;
+    height: 100px;
+  }
+  .kiosk-shell[data-layout='camera'] .kiosk-camera-caption {
+    bottom: 134px;
+    max-width: 140px;
+  }
+  .kiosk-shell[data-layout='camera'] .kiosk-pause-progress {
+    top: 350px;
+    left: 12px;
+    right: 12px;
+  }
+}

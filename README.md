@@ -20,6 +20,24 @@ npm test            # Geometry, tracking confidence, and repetition tests
 npm run test:e2e    # Chrome browser integration tests
 ```
 
+### Mobile camera testing over HTTPS
+
+Keep `npm run dev` for HTTP on port **5175**. In another terminal run:
+
+```sh
+npm run dev:https
+```
+
+On the same Wi-Fi/LAN, open the **Network** HTTPS URL printed by Vite, for example `https://<computer-LAN-IP>:5176/#kiosk`. Use the computer's address, not `localhost` on the tablet. Both servers can run together; they use separate dependency caches. Models, WASM and hot reload use the same HTTPS origin.
+
+The default HTTPS mode uses a cached, self-signed development certificate from [Vite's basic SSL plugin](https://github.com/vitejs/vite-plugin-basic-ssl). The browser will show a certificate warning. Accepting the warning can be sufficient for local testing, but it does not guarantee camera permission in every mobile browser. `getUserMedia` requires a [secure context](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia). If the tablet still blocks the camera, use a certificate whose issuing CA is trusted on that tablet and whose subject alternative names include the computer's LAN IP or hostname:
+
+```sh
+DEV_HTTPS_CERT=.certs/dev-cert.pem DEV_HTTPS_KEY=.certs/dev-key.pem npm run dev:https
+```
+
+Supply both PEM file paths. `.certs/` is ignored by git. For iPadOS, a manually installed CA certificate also needs SSL trust enabled under **Settings → General → About → Certificate Trust Settings**; see [Apple's certificate trust instructions](https://support.apple.com/en-us/102390). Installing/trusting a CA is a device setup step; this app does not change system trust settings. HTTP, HTTPS and each different hostname/IP have separate browser permissions and local storage.
+
 Browser tests use installed Google Chrome. To use Playwright Chromium instead, remove `channel: 'chrome'` from `playwright.config.ts` and run `npx playwright install chromium`.
 
 ## Electron desktop app
@@ -113,3 +131,19 @@ The measurements are heuristic changes relative to a user-selected reference, no
 - Illustrations and app icons are SVG. The photo in `tests/fixtures/pose.jpg` is the official [MediaPipe test image](https://storage.googleapis.com/mediapipe-assets/pose.jpg), used only for automated inference verification and not shipped in the app.
 
 Implementation reference: [Google's Pose Landmarker web guide](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js).
+
+### Movement kiosk
+
+Open **Kiosk / 互動站** from Movement Studio, or visit `http://localhost:5175/#kiosk`. The original teacher workspace and exercise library remain available through **Teacher studio / 老師工作室**. The kiosk is a separate interface sharing the catalogue, tracking, counting and local session history. It offers the five front-facing movements with automatic analysis; teacher-reviewed movements remain in the teacher workspace.
+
+- A raised wrist controls a mirrored, smoothed cursor. Either hand works; lower the active hand before switching hands. Body-relative reach maps to the viewport, independently of the letterboxed camera image.
+- Hold the cursor on a highlighted button for **1.4 seconds** to select. Leave the buttons or lower the hand for at least **0.3 seconds** before the next selection. The ring shows progress. Touch and keyboard controls remain available.
+- Select a movement, watch the animated example, then choose **I’m ready / 準備好了**. Whole-body visibility starts the existing three-second preparation countdown.
+- Menu pointing is disabled while exercising. Hold both hands crossed at the chest for **1.8 seconds** to pause. Lower the hands and point to **Resume / 繼續** to continue. The gesture uses pose wrists/shoulders, not finger or pinch recognition.
+- Missing body tracking for **1.8 seconds**, or hiding the page, pauses practice. Earned counts remain. After **45 seconds** without a visible body the kiosk saves any activity and returns to movement selection. Completion offers another attempt or another movement; navigation does not start cameras in the teacher workspace.
+- Large counts, earned stars and a completion celebration reflect the existing analysis. Optional synthesized chimes play once per newly earned repetition (or held second). The Sound control needs a teacher's touch/keyboard action to unlock browser audio. Motion demonstrations remain animated regardless of OS Reduce Motion; decorative celebrations respect it.
+- **Camera view / 鏡頭全畫面** fills the browser viewport with the camera and overlays progress, the animated example and controls. It is the initial default on portrait screens at least 600 CSS pixels wide. The centre stays clear during practice; menus appear as readable overlay cards. **Split view / 分欄顯示** restores the original kiosk layout, and the choice is remembered locally. Switching views or rotating the tablet keeps the same camera stream and session. Both layouts preserve the full captured image with matching video/skeleton letterboxing; a landscape camera source may leave space above and below on a portrait display. Browser fullscreen is optional and requires a supported browser plus a touch/keyboard action; if unavailable, camera view still fills the webpage while browser toolbars remain visible.
+
+Camera permission must be granted at installation/startup. The kiosk attempts to open the camera on entry but cannot grant browser permission or enable browser fullscreen/audio through camera gestures. Camera/model errors offer a reconnect control and expandable diagnostics. Streams and tracking are released when leaving the workspace.
+
+Implementation lives in `src/kiosk/`: `input.ts` contains gesture and dwell logic; `useKioskInput.ts` connects the cursor to eligible buttons; `KioskStudio.tsx` provides the student flow. Gesture thresholds and body-relative cursor reach are initial prototype defaults, not validated with Primary 1–3 children. Test reach, lighting, accidental activations and recognition at the installed camera distance before unattended use. Automated kiosk tests supply deterministic camera landmarks to verify selection, pausing, counting and layout; they do not establish real-camera gesture accuracy.

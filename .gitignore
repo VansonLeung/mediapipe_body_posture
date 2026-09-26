@@ -6,3 +6,4 @@ public/wasm
 playwright-report
 test-results
 .DS_Store
+.certs/

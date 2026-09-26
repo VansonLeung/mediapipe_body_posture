@@ -17,7 +17,11 @@ export default defineConfig({
     { name: 'chromium', use: { channel: 'chrome' } },
     {
       name: 'webkit-dropdowns',
-      testMatch: ['**/dropdowns.spec.ts', '**/animation.spec.ts'],
+      testMatch: [
+        '**/dropdowns.spec.ts',
+        '**/animation.spec.ts',
+        '**/kiosk.spec.ts',
+      ],
       use: {
         ...devices['Desktop Safari'],
         browserName: 'webkit',
