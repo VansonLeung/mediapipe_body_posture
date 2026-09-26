@@ -90,7 +90,11 @@ async function pointAt(page: Page, action: string) {
   await page.evaluate(
     ({ x, y }) => {
       const p = structuredClone((window as any).kioskTestNeutral);
-      p[16] = { x: 0.5 - (x - 0.5) * 0.6, y: 0.09 + y * 0.465, visibility: 1 };
+      p[16] = {
+        x: 0.5 - (x - 0.5) * 0.375,
+        y: 0.3225 + (y - 0.5) * 0.290625,
+        visibility: 1,
+      };
       (window as any).kioskTestPose = p;
     },
     { x, y },
@@ -387,5 +391,100 @@ test('camera denial is recoverable and the original workspace remains available'
     .click();
   await expect(
     page.getByRole('combobox', { name: 'Choose exercise' }),
+  ).toBeVisible();
+});
+
+test('chest-up navigation stays present but requires full-body exercise framing', async ({
+  page,
+}) => {
+  test.setTimeout(90000);
+  await page.setViewportSize({ width: 800, height: 1280 });
+  await simulatedCamera(page);
+  await page.goto('/#kiosk');
+  await expect(page.getByText('I can see you', { exact: true })).toBeVisible();
+  // Simulate a seated/chest-up person: hips and all leg landmarks are unavailable.
+  await page.evaluate(() => {
+    for (let i = 23; i < 33; i++)
+      (window as any).kioskTestNeutral[i] = { x: 0.5, y: 1.5, visibility: 0 };
+  });
+  await neutral(page);
+  await pointAt(page, 'choose');
+  const shell = page.locator('.kiosk-shell');
+  await expect(shell).toHaveAttribute('data-view', 'ready');
+  await expect(page.locator('[data-kiosk-action="start"]')).toBeDisabled();
+  await expect(
+    page.getByText(
+      'Step back until your whole body and feet are visible before starting.',
+    ),
+  ).toBeVisible();
+  await neutral(page);
+  // Longer than the absence timeout: a present upper body must keep this screen.
+  await page.waitForTimeout(46000);
+  await expect(shell).toHaveAttribute('data-view', 'ready');
+  await pointAt(page, 'back');
+  await expect(shell).toHaveAttribute('data-view', 'choose');
+  await page.evaluate(() => {
+    for (const [i, x, y] of [
+      [23, 0.4, 0.6],
+      [24, 0.6, 0.6],
+      [25, 0.4, 0.75],
+      [26, 0.6, 0.75],
+      [27, 0.4, 0.9],
+      [28, 0.6, 0.9],
+    ])
+      (window as any).kioskTestNeutral[i] = { x, y, visibility: 1 };
+  });
+  await neutral(page);
+  await pointAt(page, 'choose');
+  await expect(shell).toHaveAttribute('data-view', 'ready');
+  await neutral(page);
+  await pointAt(page, 'start');
+  await expect(shell).toHaveAttribute('data-view', 'practice');
+  await page.evaluate(() => {
+    for (let i = 23; i < 33; i++)
+      (window as any).kioskTestNeutral[i] = { x: 0.5, y: 1.5, visibility: 0 };
+  });
+  await neutral(page);
+  await expect(shell).toHaveAttribute('data-view', 'paused');
+  await expect(page.locator('[data-kiosk-action="resume"]')).toBeDisabled();
+  await pointAt(page, 'finish');
+  await expect(shell).toHaveAttribute('data-view', 'choose');
+});
+
+test('close-up upper body can select controls near opposite screen edges', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 800, height: 1280 });
+  await simulatedCamera(page);
+  await page.goto('/#kiosk');
+  await expect(page.getByText('I can see you', { exact: true })).toBeVisible();
+  await page.evaluate(() => {
+    const p = (window as any).kioskTestNeutral;
+    p[11] = { x: 0.25, y: 0.4, visibility: 1 };
+    p[12] = { x: 0.75, y: 0.4, visibility: 1 };
+    p[15].visibility = p[16].visibility = 0;
+    for (let i = 23; i < 33; i++) p[i].visibility = 0;
+  });
+  const select = async (action: string) => {
+    await neutral(page);
+    const box = (await page
+      .locator(`[data-kiosk-action="${action}"]`)
+      .boundingBox())!;
+    await page.evaluate(
+      ({ x, y }) => {
+        const p = structuredClone((window as any).kioskTestNeutral);
+        p[16] = { x: 0.8 - x * 0.6, y: 0.2 + y * 0.6, visibility: 1 };
+        (window as any).kioskTestPose = p;
+      },
+      { x: (box.x + box.width / 2) / 800, y: (box.y + box.height / 2) / 1280 },
+    );
+  };
+  await select('next');
+  await expect(page.locator('.kiosk-choice h2')).toHaveText(
+    'Standing side bends',
+  );
+  await select('language');
+  await expect(
+    page.getByRole('heading', { name: '動作互動站', exact: true }),
   ).toBeVisible();
 });

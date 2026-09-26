@@ -31,7 +31,7 @@
   background: #fff;
   border: 2px solid #bacfc4;
   border-radius: 12px;
-  min-height: 48px;
+  min-height: 56px;
   padding: 8px 14px;
   font-size: clamp(16px, 1.3vw, 24px);
 }
@@ -136,7 +136,7 @@
   flex: 1;
 }
 .kiosk-button {
-  min-height: 80px;
+  min-height: 96px;
   padding: 16px 24px;
   font-size: clamp(22px, 2.2vw, 36px);
   line-height: 1.2;
@@ -190,7 +190,7 @@
 }
 .kiosk-panel .demo-controls .ant-btn {
   height: auto;
-  min-height: 48px;
+  min-height: 56px;
   font-size: clamp(16px, 1.2vw, 22px);
   padding: 8px 12px;
   white-space: normal;
@@ -353,7 +353,7 @@
   .kiosk-teacher-controls button {
     font-size: 14px;
     padding: 6px 8px;
-    min-height: 44px;
+    min-height: 52px;
   }
   .kiosk-layout {
     padding: 12px;
@@ -361,7 +361,7 @@
     grid-template-rows: minmax(170px, 0.6fr) minmax(360px, 1.4fr);
   }
   .kiosk-button {
-    min-height: 64px;
+    min-height: 80px;
     padding: 12px;
     font-size: 22px;
   }
@@ -397,7 +397,7 @@
   .kiosk-panel .demo-controls .ant-btn {
     font-size: 14px;
     padding: 6px;
-    min-height: 44px;
+    min-height: 52px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -502,7 +502,7 @@
   left: 50%;
   bottom: calc(112px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  width: min(540px, calc(100% - 40px));
+  width: min(620px, calc(100% - 40px));
   max-height: calc(100% - 270px);
   gap: 12px;
   padding: 20px;
@@ -530,9 +530,9 @@
   font-size: 20px;
 }
 .kiosk-shell[data-layout='camera'] .kiosk-button {
-  min-height: 64px;
-  padding: 12px;
-  font-size: clamp(22px, 2vw, 28px);
+  min-height: 88px;
+  padding: 16px;
+  font-size: clamp(24px, 2.2vw, 32px);
 }
 .kiosk-shell[data-layout='camera'] .kiosk-help {
   position: absolute;
@@ -642,7 +642,7 @@
 }
 .kiosk-shell[data-layout='camera'][data-view='practice'] .kiosk-coaching {
   position: absolute;
-  bottom: 80px;
+  bottom: 104px;
   left: 0;
   max-width: min(560px, 100%);
   margin: 0;
@@ -658,7 +658,7 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 180px;
+  width: 220px;
   pointer-events: auto;
 }
 @media (max-width: 600px) {

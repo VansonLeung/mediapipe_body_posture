@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { bodyVisible, crossedArms, DwellSelection, KioskInput } from './input';
+import {
+  bodyVisible,
+  upperBodyVisible,
+  crossedArms,
+  DwellSelection,
+  KioskInput,
+} from './input';
 import type { Landmark } from '../analysis/types';
 function pose(): Landmark[] {
   const p = Array.from({ length: 33 }, () => ({
@@ -46,6 +52,41 @@ describe('kiosk camera commands', () => {
     p[12].x = p[11].x;
     expect(input.update(p, 300, true, false).pointer).toBeNull();
     expect(bodyVisible([])).toBe(false);
+  });
+  it('supports chest-up and seated navigation without relying on inferred lower-body points', () => {
+    const p = pose();
+    p[16] = { x: 0.35, y: 0.28, visibility: 1 };
+    const full = new KioskInput().update(p, 100, true, false).pointer;
+    for (let i = 23; i < 33; i++) p[i] = { x: NaN, y: 1.5, visibility: 0 };
+    expect(upperBodyVisible(p)).toBe(true);
+    expect(bodyVisible(p)).toBe(false);
+    const input = new KioskInput();
+    expect(input.update(p, 100, true, false).pointer).toEqual(full);
+    expect(input.update(p, 200, false, true).pointer).toBeNull();
+    p[16].visibility = 0;
+    expect(input.update(p, 300, true, false).pointer).toBeNull();
+    p[11].visibility = 0;
+    expect(upperBodyVisible(p)).toBe(false);
+    expect(input.update(p, 400, true, false).pointer).toBeNull();
+  });
+  it('reaches all screen edges within the central portion of the close-up hand area', () => {
+    const p = pose();
+    p[11] = { x: 0.25, y: 0.4, visibility: 1 };
+    p[12] = { x: 0.75, y: 0.4, visibility: 1 };
+    p[15].visibility = 0;
+    for (let i = 23; i < 33; i++) p[i].visibility = 0;
+    for (const [x, y, expectedX, expectedY] of [
+      [0.2, 0.2, 0.98, 0.02],
+      [0.8, 0.2, 0.02, 0.02],
+      [0.2, 0.8, 0.98, 0.98],
+      [0.8, 0.8, 0.02, 0.98],
+    ]) {
+      p[16] = { x, y, visibility: 1 };
+      expect(new KioskInput().update(p, 100, true, false).pointer).toEqual({
+        x: expectedX,
+        y: expectedY,
+      });
+    }
   });
   it('requires sustained crossed arms to pause, fires once, and hides the menu cursor until released', () => {
     const input = new KioskInput(),

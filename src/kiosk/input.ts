@@ -16,6 +16,14 @@ const valid = (p: Landmark | undefined): p is Landmark =>
   p.y <= 1 &&
   (p.visibility ?? 0) >= 0.65;
 
+// Upper-body presence and navigation do not require hips or legs.
+export function upperBodyVisible(points: Landmark[]) {
+  return (
+    [11, 12].every((i) => valid(points[i])) &&
+    Math.abs(points[11].x - points[12].x) >= 0.06
+  );
+}
+
 export function bodyVisible(points: Landmark[]) {
   return [11, 12, 23, 24, 27, 28].every((i) => valid(points[i]));
 }
@@ -118,19 +126,17 @@ export class KioskInput {
       this.pauseSince = null;
       this.pauseFired = false;
     }
-    if (
-      !navigation ||
-      crossed ||
-      ![11, 12, 23, 24].every((i) => valid(points[i]))
-    ) {
+    if (!navigation || crossed || !upperBodyVisible(points)) {
       this.hand = null;
       this.pointer = null;
       return { pointer: null, pause, pauseProgress };
     }
     const shoulderY = (points[11].y + points[12].y) / 2;
-    const hipY = (points[23].y + points[24].y) / 2;
-    const torso = hipY - shoulderY;
     const span = Math.abs(points[11].x - points[12].x);
+    // A shoulder-based reach area stays stable when hips leave the frame,
+    // including seated navigation. Never use inferred off-screen hips.
+    const torso = span * 1.5;
+    const hipY = shoulderY + torso;
     const raised = (i: 15 | 16) =>
       valid(points[i]) && points[i].y < hipY - torso * 0.15;
     if (span < 0.06 || torso < 0.08) {
@@ -150,9 +156,17 @@ export class KioskInput {
     const clamp = (n: number) => Math.max(0.02, Math.min(0.98, n));
     // Mirrored cursor; body-relative reach maps to the entire viewport, independent
     // of camera letterboxing or display orientation. No pixel crop is assumed.
+    // Keep the entire control area reachable inside a close-up camera image.
+    const left = Math.max(0.02, centerX - span * 1.5);
+    const right = Math.min(0.98, centerX + span * 1.5);
+    const top = Math.max(0.02, shoulderY - torso * 0.7);
+    const bottom = Math.min(0.98, shoulderY + torso * 0.85);
+    // Use a moderate gain to shorten reach without making small movements
+    // too sensitive. Apply after clipping for close-up framing too.
+    const gain = 1.6;
     const target = {
-      x: clamp(0.5 + (centerX - wrist.x) / (span * 3)),
-      y: clamp((wrist.y - (shoulderY - torso * 0.7)) / (torso * 1.55)),
+      x: clamp(0.5 + gain * ((right - wrist.x) / (right - left) - 0.5)),
+      y: clamp(0.5 + gain * ((wrist.y - top) / (bottom - top) - 0.5)),
     };
     const alpha = 1 - Math.exp(-delta / 90);
     this.pointer = this.pointer

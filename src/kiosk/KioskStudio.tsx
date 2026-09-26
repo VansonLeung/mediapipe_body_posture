@@ -9,7 +9,7 @@ import { usePoseTracker } from '../hooks/usePoseTracker';
 import { useAppFullscreen } from '../hooks/useAppFullscreen';
 import { MovementDemo } from '../components/MovementDemo';
 import { PoseArt } from '../components/PoseArt';
-import { bodyVisible } from './input';
+import { bodyVisible, upperBodyVisible } from './input';
 import { useKioskInput } from './useKioskInput';
 import './kiosk.css';
 
@@ -58,6 +58,10 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
   const audio = useRef<AudioContext | null>(null);
   const lastReward = useRef(0);
   const lastSeen = useRef(performance.now());
+  const lastBodySeen = useRef(performance.now());
+  const bodySince = useRef<number | null>(null);
+  const [bodyReady, setBodyReady] = useState(false);
+  const [personPresent, setPersonPresent] = useState(false);
   const exercise = localizeExercise(exercises[index], language);
   const save = useCallback((record: SessionRecord) => {
     try {
@@ -86,7 +90,18 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
     overlay: true,
     tweening: true,
     onFrame: (points: Landmark[], time: number, aspect: number) => {
-      if (bodyVisible(points)) lastSeen.current = performance.now();
+      const now = performance.now();
+      const present = upperBodyVisible(points);
+      setPersonPresent(present);
+      if (present) lastSeen.current = now;
+      if (bodyVisible(points)) {
+        lastBodySeen.current = now;
+        bodySince.current ??= now;
+        setBodyReady(now - bodySince.current >= 500);
+      } else {
+        bodySince.current = null;
+        setBodyReady(false);
+      }
       input.onFrame(points);
       if (!document.hidden) session.onFrame(points, time, aspect);
     },
@@ -123,7 +138,13 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
     const timer = window.setInterval(() => {
       const state = latest.current;
       const missing = performance.now() - lastSeen.current;
-      if (state.active && !state.paused && missing > 1800) {
+      const bodyMissing = performance.now() - lastBodySeen.current;
+      if (bodyMissing > 350) {
+        bodySince.current = null;
+        setBodyReady(false);
+      }
+      if (missing > 350) setPersonPresent(false);
+      if (state.active && !state.paused && bodyMissing > 1800) {
         setPauseReason('tracking');
         state.pause(true);
       }
@@ -191,6 +212,8 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
     }
   };
   const start = () => {
+    if (!bodyReady) return;
+    lastBodySeen.current = performance.now();
     lastSeen.current = performance.now();
     lastReward.current = 0;
     session.finish();
@@ -375,11 +398,11 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
           )}
           {tracker.status === 'ready' && (
             <div className="kiosk-camera-caption">
-              {session.analysis.visible
+              {personPresent
                 ? t('I can see you', '看見你了')
                 : t(
-                    'Show your whole body, including your feet',
-                    '讓鏡頭看見全身及雙腳',
+                    'Show your shoulders and raise a hand to choose',
+                    '讓鏡頭看見雙肩，舉手選擇',
                   )}
             </div>
           )}
@@ -439,13 +462,21 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
                 autoPlay
                 gestureControls
               />
+              {!bodyReady && (
+                <p role="status">
+                  {t(
+                    'Step back until your whole body and feet are visible before starting.',
+                    '開始前，請退後至鏡頭看見全身及雙腳。',
+                  )}
+                </p>
+              )}
               <div className="kiosk-actions">
                 {button('back', t('Choose another', '選其他動作'), browse)}
                 {button(
                   'start',
                   t('I’m ready →', '準備好了 →'),
                   start,
-                  tracker.status !== 'ready',
+                  tracker.status !== 'ready' || !bodyReady,
                   true,
                 )}
               </div>
@@ -466,8 +497,12 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
               </p>
               <p>
                 {t(
-                  'Take a breath. Choose what’s next.',
-                  '休息一下，再選擇下一步。',
+                  bodyReady
+                    ? 'Take a breath. Choose what’s next.'
+                    : 'Show your whole body and feet to play again, or choose another movement.',
+                  bodyReady
+                    ? '休息一下，再選擇下一步。'
+                    : '再玩一次前，請讓鏡頭看見全身及雙腳，或選其他動作。',
                 )}
               </p>
               <div className="kiosk-actions">
@@ -475,7 +510,7 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
                   'again',
                   t('Try again', '再玩一次'),
                   start,
-                  tracker.status !== 'ready',
+                  tracker.status !== 'ready' || !bodyReady,
                 )}
                 {button(
                   'another',
@@ -490,10 +525,10 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
             <>
               <h2>{t('Let’s pause', '休息一下')}</h2>
               <p>
-                {pauseReason === 'tracking'
+                {pauseReason === 'tracking' || !bodyReady
                   ? t(
-                      'Come back into view. Your progress is saved here.',
-                      '回到鏡頭範圍，進度仍然保留。',
+                      'Show your whole body, including your feet, to resume. Your progress is saved here.',
+                      '讓鏡頭看見全身及雙腳再繼續，進度仍然保留。',
                     )
                   : t(
                       'Lower your arms, then choose Resume.',
@@ -508,11 +543,12 @@ export default function KioskStudio({ onExit }: { onExit: () => void }) {
                   'resume',
                   t('Resume →', '繼續 →'),
                   () => {
-                    lastSeen.current = performance.now();
+                    if (!bodyReady) return;
+                    lastBodySeen.current = performance.now();
                     session.setPaused(false);
                     input.clear();
                   },
-                  tracker.status !== 'ready',
+                  tracker.status !== 'ready' || !bodyReady,
                   true,
                 )}
                 {button('finish', t('Finish', '結束'), browse)}
